@@ -21,7 +21,7 @@ function render() {
   invalidate();
   const v = $('#view'); v.style.padding = '';
   v.innerHTML = ({ today: vToday, train: vTrain, food: vFood, prog: vProg, me: vMe }[S.ui.tab] || vToday)();
-  renderTabbar(); $('#tabbar').classList.toggle('away', !!OV); animateIn(v); drawCharts(); fillPhotos();
+  renderTabbar(); $('#tabbar').classList.toggle('away', !!OV); animateIn(v); drawCharts(); drawKcalChart(); fillPhotos();
 }
 function go(tab) {
   if (tab === S.ui.tab) { scrollTo({ top: 0, behavior: 'smooth' }); return; }
@@ -70,6 +70,8 @@ function vToday() {
   h += posterToday(k, pl);
   h += sec('Nutrition', `<button class="link" data-a="tab" data-v="food">Journal</button>`) + nutCard(t, n);
   const sug = adaptSuggestion(); if (sug) h += adaptCard(sug);
+  if (pl || S.plan[mondayOf(k)]) h += menuTodayCard(k);
+  h += waterCard(k);
   const ms = missions(k);
   h += sec('Objectifs du jour', `<span class="small num">${ms.filter(m => m.ok).length} sur ${ms.length}</span>`) + `<div class="card tight">${ms.map(missionRow).join('')}</div>`;
   h += sec('Cette semaine') + weekCard(k);
@@ -339,30 +341,27 @@ function closeTimer() { if (TM) clearInterval(TM.iv); TM = null; const el = $('#
 
 /* ================= Nutrition ================= */
 function vFood() {
+  const tab = S.ui.foodTab || 'journal', t0 = targets();
+  let h = `<header class="hd"><div><div class="over">Objectif ${fmt(t0.kcal)} kcal · ${t0.prot} g de protéines</div><h1 class="h1">Nutrition</h1></div></header>` + foodTabs();
+  if (tab === 'menu') return h + vMenu();
+  if (tab === 'stats') return h + vStats();
   const k = S.ui.foodDate || today(), t = targets(k), n = dayNut(k), entries = S.food[k] || [];
-  let h = `<header class="hd"><div><div class="over">Objectif ${fmt(t.kcal)} kcal · ${t.prot} g de protéines</div><h1 class="h1">Nutrition</h1></div></header>`;
-  h += `<div class="row" style="margin-bottom:12px"><button class="ibtn" data-a="foodDay" data-v="-1" aria-label="Jour précédent">${ic('back')}</button><div class="grow" style="text-align:center;font-weight:700">${dayLabel(k)}</div><button class="ibtn" data-a="foodDay" data-v="1" ${k >= today() ? 'disabled style="opacity:.3"' : ''} aria-label="Jour suivant">${ic('next')}</button></div>`;
+  h += `<div class="row" style="margin-bottom:12px"><button class="ibtn" data-a="foodDay" data-v="-1" aria-label="Jour précédent">${ic('back')}</button><div class="grow" style="text-align:center;font-weight:650">${dayLabel(k)}</div><button class="ibtn" data-a="foodDay" data-v="1" ${k >= today() ? 'disabled style="opacity:.3"' : ''} aria-label="Jour suivant">${ic('next')}</button></div>`;
   const left = t.kcal - n.kcal;
   h += `<div class="card"><div class="row sb" style="align-items:flex-end"><div><div class="lbl">Mangé</div><span class="big num">${fmt(n.kcal)}</span><span class="sub"> / ${fmt(t.kcal)} kcal</span></div><div style="text-align:right"><div class="mid num ${left < 0 ? 'pro' : 'fau'}">${fmt(Math.abs(left))}</div><div class="small">${left >= 0 ? 'restantes' : 'en plus'}</div></div></div>
     <div style="margin:12px 0 14px">${bar(n.kcal / t.kcal, 'ink')}</div>
-    <div class="grid3">${[['Protéines', n.p, t.prot, 'pro'], ['Glucides', n.c, t.carb, 'cob'], ['Lipides', n.f, t.fat, 'sand']].map(([l, v, g, c]) => `<div><div class="lbl">${l}</div><div class="num" style="font-weight:700;margin:2px 0 6px">${fmt(v)}<span class="small"> / ${g} g</span></div>${bar(v / g, c)}</div>`).join('')}</div>
+    <div class="grid3">${[['Protéines', n.p, t.prot, 'pro'], ['Glucides', n.c, t.carb, 'cob'], ['Lipides', n.f, t.fat, 'sand']].map(([l, v, g, c]) => `<div><div class="lbl">${l}</div><div class="num" style="font-weight:650;margin:2px 0 6px">${fmt(v)}<span class="small"> / ${g} g</span></div>${bar(v / g, c)}</div>`).join('')}</div>
     <div class="small" style="margin-top:12px">Fibres ${fmt(n.fib)} / ${t.fib} g</div></div>`;
   if (k === today()) { const sug = adaptSuggestion(); if (sug) h += adaptCard(sug); }
-  const w = S.water[k] || 0;
-  h += `<div class="card" style="margin-top:12px"><div class="row sb"><div class="row"><span class="kico" style="background:var(--waterBg);color:var(--water)">${ic('drop')}</span><div><div class="h3">Eau</div><div class="small num">${fmt(w / 1000, 2)} / ${fmt(t.water / 1000, 2)} L</div></div></div><div class="row"><button class="ibtn" data-a="water" data-v="-250" aria-label="Retirer 250 ml">${ic('minus')}</button><button class="btn cob sm" data-a="water" data-v="250">+250 ml</button></div></div><div style="margin-top:12px">${bar(w / t.water, 'water')}</div></div>`;
+  h += menuTodayCard(k);
+  h += waterCard(k);
   for (const m of MEALS) {
     const list = entries.map((e, i) => [e, i]).filter(([e]) => e.m === m.k), mk = sumMac(list.map(x => x[0]));
-    h += `<div class="card" style="margin-top:12px"><div class="card-h"><div><div class="h3">${m.n}</div><div class="small num">${fmt(mk.kcal)} kcal · P ${fmt(mk.p)} g</div></div><button class="ibtn" data-a="foodAdd" data-v="${m.k}" aria-label="Ajouter au ${m.n}">${ic('plus')}</button></div>`;
-    h += list.length ? list.map(([e, i]) => { const mm = entryMac(e); return `<button class="li" data-a="entry" data-v="${i}"><span class="grow"><span class="ttl">${esc(entryName(e))}</span><span class="meta num">${e.q ? 'Ajout rapide' : `${fmt(e.g)} g`} · P ${fmt(mm.p)} · G ${fmt(mm.c)} · L ${fmt(mm.f)}</span></span><span class="end num" style="font-weight:700">${fmt(mm.kcal)}</span></button>`; }).join('') : `<div class="small">Rien pour l’instant.</div>`;
+    h += `<div class="card" style="margin-top:12px"><div class="card-h"><div><div class="h3">${m.n}</div><div class="small num">${fmt(mk.kcal)} kcal · ${fmt(mk.p)} g prot.</div></div><button class="ibtn" data-a="foodAdd" data-v="${m.k}" aria-label="Ajouter au ${m.n}">${ic('plus')}</button></div>`;
+    h += list.length ? list.map(([e, i]) => { const mm = entryMac(e); return `<button class="li" data-a="entry" data-v="${i}"><span class="grow"><span class="ttl">${esc(entryName(e))}</span><span class="meta num">${e.q ? 'Ajout rapide' : `${fmt(e.g)} g`} · P ${fmt(mm.p)} · G ${fmt(mm.c)} · L ${fmt(mm.f)}</span></span><span class="end num" style="font-weight:650">${fmt(mm.kcal)}</span></button>`; }).join('') : `<div class="small" style="padding-bottom:6px">Rien pour l\u2019instant.</div>`;
     h += `</div>`;
   }
-  h += sec('Journées types', `<button class="link" data-a="myFoods">Mes aliments</button>`);
-  h += `<p class="sub" style="margin:-4px 2px 10px">Trois journées calibrées sur ta cible. Touche un repas pour l’ajouter d’un coup au journal.</p><div class="chips scroll">`;
-  for (const pl of PLANS) {
-    const f = planScale(pl, t.kcal), all = pl.meals.flatMap(m => scaledItems(m.items, f)), mk = itemsMac(all);
-    h += `<button class="card" style="min-width:230px;text-align:left;flex:none" data-a="plan" data-v="${pl.id}"><div class="over">${esc(pl.tag)}</div><div class="h2" style="margin:2px 0 10px">${esc(pl.n)}</div><div class="num" style="font-weight:700">${fmt(mk.kcal)} kcal</div><div class="small num">P ${fmt(mk.p)} · G ${fmt(mk.c)} · L ${fmt(mk.f)} g</div><div class="small" style="margin-top:8px">${pl.meals.map(m => esc(m.n)).join(' · ')}</div></button>`;
-  }
-  h += `</div>`;
+  h += `<div class="row" style="margin-top:14px"><button class="btn ghost sm grow" data-a="myFoods">Mes aliments</button><button class="btn ghost sm grow" data-a="foodTab" data-v="stats">Voir l\u2019analyse</button></div>`;
   return h;
 }
 function openPlan(id) {

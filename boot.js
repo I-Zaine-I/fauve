@@ -14,7 +14,46 @@ const A = {
   start: el => { closeSheet(); startWorkout(+el.dataset.w, +el.dataset.d); },
   resume: () => openWorkout(),
   weekNav: el => { const cw = Math.max(1, weekOf(today())); S.ui.week = clamp((S.ui.week || cw) + (+el.dataset.v), 1, Math.max(PROGRAM_WEEKS + 4, cw + 2)); save(); render(); haptic(); },
-  water: el => { const k = S.ui.tab === 'food' ? dk() : today(); S.water[k] = Math.max(0, (S.water[k] || 0) + (+el.dataset.v || 250)); invalidate(); save(); haptic(); if ((+el.dataset.v) > 0 && S.water[k] >= targets(k).water && S.water[k] - (+el.dataset.v) < targets(k).water) { toast('Objectif d’eau atteint'); confetti(50); } render(); },
+  water: el => {
+    const k = el.dataset.k || (S.ui.tab === 'food' ? dk() : today()), v = +el.dataset.v || 250, goal = waterGoal(k), before = S.water[k] || 0;
+    S.water[k] = Math.max(0, before + v); if (v > 0 && k === today()) S.lastWaterAt = Date.now();
+    invalidate(); save(); haptic(); closeNudge();
+    if (v > 0 && before < goal && S.water[k] >= goal) { toast(`Objectif d’eau atteint : ${fmt(goal / 1000, 2)} L, bravo`); confetti(60); beep(784, .15, 'sine', .2); beep(1175, .25, 'sine', .18, .12); }
+    else if (v > 0) toast(`+${v} ml · ${fmt(S.water[k] / 1000, 2)} L sur ${fmt(goal / 1000, 2)} L`);
+    render();
+  },
+  nudgeDrink: () => { A.water({ dataset: { v: '250', k: today() } }); },
+  nudgeClose: () => { closeNudge(); },
+  foodTab: el => { S.ui.foodTab = el.dataset.v; S.ui.foodDate = null; save(); const run = () => { render(); scrollTo(0, 0); }; if (document.startViewTransition && !reduced()) document.startViewTransition(run); else run(); haptic(); },
+  goMenu: () => { closeOv(); S.ui.tab = 'food'; S.ui.foodTab = 'menu'; S.ui.menuWeek = 0; save(); render(); scrollTo(0, 0); },
+  menuWeek: el => { S.ui.menuWeek = +el.dataset.v; save(); render(); },
+  menuAuto: el => {
+    const wk = el.dataset.v, run = () => { S.plan[wk] = autoFill(wk, Date.now() % 1000); S.shop[wk] = {}; save(); render(); haptic(2); toast('Semaine proposée : touche un repas pour le changer'); };
+    if (S.plan[wk]) confirmSheet('Remplacer le menu de cette semaine par une nouvelle proposition ?', 'Remplacer', run); else run();
+  },
+  menuBlank: el => { S.plan[el.dataset.v] = {}; save(); render(); },
+  menuClear: el => confirmSheet('Effacer tout le menu de cette semaine ?', 'Effacer', () => { delete S.plan[el.dataset.v]; save(); render(); }, true),
+  menuPick: el => openMenuPick(el.dataset.w, +el.dataset.d, el.dataset.v),
+  menuSet: el => {
+    const wk = el.dataset.w, d = +el.dataset.d, sl = el.dataset.s, v = el.dataset.v;
+    S.plan[wk] = S.plan[wk] || {}; S.plan[wk][d] = S.plan[wk][d] || {};
+    if (v) S.plan[wk][d][sl] = v; else delete S.plan[wk][d][sl];
+    save(); closeSheet(); haptic();
+    if (OV) closeOv(); else render();
+    if (v) toast(`${slotName(sl)} de ${DOW[d].toLowerCase()} : ${RMAP[v].n}`);
+  },
+  recipe: el => openRecipe(el.dataset.v, el.dataset.w ? { wk: el.dataset.w, d: el.dataset.d, s: el.dataset.s } : {}),
+  recipeLog: el => {
+    const r = RMAP[el.dataset.v], k = today(), ch = Object.assign({}, planDay(mondayOf(k), dowOf(k)), { [r.m]: r.id }), items = scaleItems(r.items, dayFactor(ch, targets(k).kcal));
+    S.food[k] = (S.food[k] || []).concat(items.map(([f, g]) => ({ id: uid(), m: r.m, f, g }))); invalidate(); save(); haptic(); closeOv(); toast(`${r.n} ajouté au journal`);
+  },
+  ate: el => { logMeal(el.dataset.k, el.dataset.v); haptic(); toast('Ajouté au journal'); render(); },
+  ateUndo: el => { unlogMeal(el.dataset.k, el.dataset.v); render(); },
+  shop: el => openShop(el.dataset.v),
+  shopTick: el => { const wk = el.dataset.w; S.shop[wk] = S.shop[wk] || {}; S.shop[wk][el.dataset.v] = !S.shop[wk][el.dataset.v]; save(); haptic(); const sc = $('.ov') ? $('.ov').scrollTop : 0; openShop(wk); const o = $('.ov'); if (o) { o.style.animation = 'none'; o.scrollTop = sc; } },
+  shopCopy: el => { const txt = shopText(el.dataset.v); if (navigator.clipboard) navigator.clipboard.writeText(txt).then(() => toast('Liste copiée : colle-la dans Notes'), () => toast('Copie impossible')); else toast('Copie impossible'); },
+  waterGoal: el => { S.settings.waterGoal = el.dataset.v === 'auto' ? 'auto' : +el.dataset.v; invalidate(); save(); haptic(); render(); },
+  waterEvery: el => { S.settings.waterEvery = +el.dataset.v; save(); haptic(); render(); },
   habit: el => { const k = today(), h = S.habits[k] = S.habits[k] || {}; h[el.dataset.v] = !h[el.dataset.v]; invalidate(); save(); haptic(); render(); },
   weigh: () => sheetWeigh(),
   saveWeigh: () => { const v = val('w-kg'); if (!v || v < 30 || v > 300) return toast('Poids invalide'); S.weights = S.weights.filter(x => x.d !== today()); S.weights.push({ d: today(), kg: round(v, 2) }); invalidate(); save(); closeSheet(); haptic(); toast(`Pesée enregistrée · tendance ${fmt(curWeight(), 1)} kg`); render(); },
@@ -50,7 +89,7 @@ const A = {
     const old = S.active.items[i], it = mkItem([k, old.sets.length, old.lo, old.hi, old.rir, old.rest]);
     S.active.items[i] = it; save(); refreshExc(i); toast(`Remplacé par ${EX[k].n}`);
   },
-  woMenu: () => openSheet(`<h2 class="h2">Séance</h2><button class="li" data-a="timer" data-v="mma5">${ic('timer')}<span class="grow ttl">Chrono intervalles</span></button><button class="li" data-a="library">${ic('book')}<span class="grow ttl">Bibliothèque d’exercices</span></button><button class="li" data-a="abandon">${ic('trash', 'pro')}<span class="grow ttl pro">Abandonner la séance</span></button>`),
+  woMenu: () => openSheet(`<h2 class="h2">Séance</h2><button class="li" data-a="timer" data-v="mma5">${ic('timer')}<span class="grow ttl">Chrono intervalles</span></button><button class="li" data-a="library">${ic('plus')}<span class="grow ttl">Ajouter un exercice</span></button><button class="li" data-a="abandon">${ic('trash', 'pro')}<span class="grow ttl pro">Abandonner la séance</span></button>`),
   abandon: () => { closeSheet(); setTimeout(() => confirmSheet('Abandonner la séance ? Les séries validées seront perdues.', 'Abandonner', () => { S.active = null; save(); hideRest(); releaseWake(); closeOv(); }, true), 250); },
   finish: () => finishWorkout(),
   restAdd: el => { REST.end += (+el.dataset.v) * 1000; REST.total = Math.max(REST.total, (REST.end - Date.now()) / 1000); REST.fired = false; const r = $('#rest'); if (r) r.classList.remove('end'); restTick(); },
@@ -262,8 +301,13 @@ function registerSW() {
   navigator.serviceWorker.addEventListener('controllerchange', () => { if (reloading) return; reloading = true; saveNow(); location.reload(); });
 }
 let lastDay = today();
+function keyboardFix() {
+  const vv = window.visualViewport; if (!vv) return;
+  const upd = () => { const kb = Math.max(0, innerHeight - vv.height - vv.offsetTop); document.documentElement.style.setProperty('--kb', (kb > 60 ? kb : 0) + 'px'); };
+  vv.addEventListener('resize', upd); vv.addEventListener('scroll', upd);
+}
 function boot() {
-  applyTheme();
+  applyTheme(); keyboardFix();
   document.addEventListener('touchstart', () => audio(), { once: true, passive: true });
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
   if (!S.profile) renderOnboarding();

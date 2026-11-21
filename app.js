@@ -35,9 +35,9 @@ const LS = 'fauve.v1';
 const DEF = () => ({
   v: 1, created: today(), profile: null,
   weights: [], measures: [], workouts: [], food: {}, water: {}, habits: {}, customFoods: [],
-  tests: [], photos: [], slots: {}, kcalAdj: 0, adjDate: null,
-  settings: { sound: true, haptics: true, loud: false, theme: 'auto' }, active: null,
-  ui: { tab: 'today', week: null, foodDate: null }, dismiss: {}, lastExport: null
+  tests: [], photos: [], slots: {}, kcalAdj: 0, adjDate: null, plan: {}, planLog: {}, shop: {}, lastWaterAt: 0,
+  settings: { sound: true, haptics: true, loud: false, theme: 'auto', waterGoal: 3000, waterRemind: true, waterEvery: 90 }, active: null,
+  ui: { tab: 'today', week: null, foodDate: null, foodTab: 'journal', menuWeek: 0 }, dismiss: {}, lastExport: null
 });
 let S = load();
 function load() {
@@ -122,8 +122,7 @@ function targets(k = today()) {
   const prot = Math.round(w * (rate > 0 ? 2.2 : 2.0) / 5) * 5;
   const fat = Math.round(Math.max(0.7 * w, kcal * 0.25 / 9));
   const carb = Math.max(0, Math.round((kcal - prot * 4 - fat * 9) / 4));
-  const pl = planOn(k); const training = pl && pl.day.k !== 'rest';
-  const water = Math.round((w * 35 + (training ? 500 : 0)) / 250) * 250;
+  const water = waterGoal(k);
   return { bmr: Math.round(bmr), tdee: Math.round(tdee), deficit: Math.round(deficit), rate, kcal, prot, fat, carb, fib: Math.round(kcal / 1000 * 14), water, w };
 }
 function adaptSuggestion() {
@@ -274,7 +273,7 @@ function haptic(n = 1) {
   try { if (navigator.vibrate) { navigator.vibrate(n > 1 ? [14, 70, 14] : 14); return; } for (let i = 0; i < n; i++) setTimeout(tapSwitch, i * 110); } catch (e) { /* ignore */ }
 }
 let toastT;
-function toast(msg) { const t = $('#toast'); if (!t) return; t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600); }
+function toast(msg) { const t = $('#toast'); if (!t) return; t.onclick = null; t.style.pointerEvents = ''; t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600); }
 function confetti(n = 90) {
   if (reduced()) return;
   const c = $('#fx'), ctx = c.getContext('2d'), dpr = devicePixelRatio || 1, W = innerWidth, H = innerHeight;

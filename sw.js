@@ -1,6 +1,6 @@
 /* Fauve — service worker : l'app marche hors ligne (salle en sous-sol, piscine…) */
-const V = 'fauve-v2.0.0';
-const CORE = ['./', 'index.html', 'styles.css', 'data.js', 'app.js', 'views.js', 'views2.js', 'boot.js',
+const V = 'fauve-v3.0.0';
+const CORE = ['./', 'index.html', 'styles.css', 'data.js', 'recipes.js', 'app.js', 'views.js', 'views2.js', 'planner.js', 'boot.js',
   'manifest.webmanifest', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png', 'favicon.png'];
 const FONTS = 'fauve-fonts';
 
