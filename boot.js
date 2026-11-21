@@ -8,18 +8,18 @@ const A = {
   closeSheet: () => closeSheet(),
   confirmOk: () => { const fn = SH && SH.fn; closeSheet(); if (fn) fn(); },
   dismiss: el => { S.dismiss[el.dataset.v] = 1; save(); render(); },
-  streakInfo: () => openSheet(`<h2 class="h2">Ta série</h2><p class="sub">Un jour est validé quand tu fais la séance prévue (ou que c’est un jour de repos) <b>et</b> que tu atteins au moins 90 % de tes protéines. C’est ce duo qui transforme le corps.</p><div class="big num fau" style="margin:10px 0">${streak()} j</div><button class="btn block" data-a="closeSheet">Compris</button>`),
+  streakInfo: () => { const n = streak(); openSheet(`<h2 class="h2">Ta série</h2><p class="sub">Un jour est réussi quand tu fais la séance prévue (ou que c’est un jour de repos) <b>et</b> que tu atteins au moins 90 % de tes protéines. C’est ce duo qui transforme le corps.</p><div class="big num" style="margin:10px 0">${n} jour${n > 1 ? 's' : ''}</div><button class="btn block" data-a="closeSheet">Compris</button>`); },
   openToday: () => { const pl = planOn(today()); if (pl) openSession(pl.week, pl.dow); },
   session: el => openSession(+el.dataset.w, +el.dataset.d),
   start: el => { closeSheet(); startWorkout(+el.dataset.w, +el.dataset.d); },
   resume: () => openWorkout(),
   weekNav: el => { const cw = Math.max(1, weekOf(today())); S.ui.week = clamp((S.ui.week || cw) + (+el.dataset.v), 1, Math.max(PROGRAM_WEEKS + 4, cw + 2)); save(); render(); haptic(); },
-  water: el => { const k = S.ui.tab === 'food' ? dk() : today(); S.water[k] = Math.max(0, (S.water[k] || 0) + (+el.dataset.v || 250)); invalidate(); save(); haptic(); if ((+el.dataset.v) > 0 && S.water[k] >= targets(k).water && S.water[k] - (+el.dataset.v) < targets(k).water) { toast('Objectif d’eau atteint · +10 XP'); confetti(50); } render(); },
+  water: el => { const k = S.ui.tab === 'food' ? dk() : today(); S.water[k] = Math.max(0, (S.water[k] || 0) + (+el.dataset.v || 250)); invalidate(); save(); haptic(); if ((+el.dataset.v) > 0 && S.water[k] >= targets(k).water && S.water[k] - (+el.dataset.v) < targets(k).water) { toast('Objectif d’eau atteint'); confetti(50); } render(); },
   habit: el => { const k = today(), h = S.habits[k] = S.habits[k] || {}; h[el.dataset.v] = !h[el.dataset.v]; invalidate(); save(); haptic(); render(); },
   weigh: () => sheetWeigh(),
   saveWeigh: () => { const v = val('w-kg'); if (!v || v < 30 || v > 300) return toast('Poids invalide'); S.weights = S.weights.filter(x => x.d !== today()); S.weights.push({ d: today(), kg: round(v, 2) }); invalidate(); save(); closeSheet(); haptic(); toast(`Pesée enregistrée · tendance ${fmt(curWeight(), 1)} kg`); render(); },
   measure: () => sheetMeasure(),
-  saveMeasure: () => { const m = { d: today() }; let n = 0; for (const f of SH.fields) { const v = val('m-' + f); if (v && v > 10 && v < 250) { m[f] = v; n++; } } if (!n) return toast('Renseigne au moins une mesure'); S.measures = S.measures.filter(x => x.d !== today()); S.measures.push(m); invalidate(); save(); closeSheet(); haptic(); toast('Mensurations enregistrées · +15 XP'); render(); },
+  saveMeasure: () => { const m = { d: today() }; let n = 0; for (const f of SH.fields) { const v = val('m-' + f); if (v && v > 10 && v < 250) { m[f] = v; n++; } } if (!n) return toast('Renseigne au moins une mesure'); S.measures = S.measures.filter(x => x.d !== today()); S.measures.push(m); invalidate(); save(); closeSheet(); haptic(); toast('Mensurations enregistrées'); render(); },
   tests: () => sheetTests(),
   saveTests: () => { let n = 0; for (const t of TESTS) { const v = val('t-' + t.k); if (v != null && v > 0) { S.tests.push({ d: today(), k: t.k, v }); n++; } } if (!n) return toast('Aucun résultat saisi'); invalidate(); save(); closeSheet(); confetti(60); toast(`${n} test${n > 1 ? 's' : ''} enregistré${n > 1 ? 's' : ''}`); render(); },
   slots: () => sheetSlots(),
@@ -50,7 +50,7 @@ const A = {
     const old = S.active.items[i], it = mkItem([k, old.sets.length, old.lo, old.hi, old.rir, old.rest]);
     S.active.items[i] = it; save(); refreshExc(i); toast(`Remplacé par ${EX[k].n}`);
   },
-  woMenu: () => openSheet(`<h2 class="h2">Séance</h2><button class="li" data-a="timer" data-v="mma5">${ic('timer')}<span class="grow ttl">Chrono rounds</span></button><button class="li" data-a="library">${ic('book')}<span class="grow ttl">Bibliothèque d’exercices</span></button><button class="li" data-a="abandon">${ic('trash', 'fau')}<span class="grow ttl fau">Abandonner la séance</span></button>`),
+  woMenu: () => openSheet(`<h2 class="h2">Séance</h2><button class="li" data-a="timer" data-v="mma5">${ic('timer')}<span class="grow ttl">Chrono intervalles</span></button><button class="li" data-a="library">${ic('book')}<span class="grow ttl">Bibliothèque d’exercices</span></button><button class="li" data-a="abandon">${ic('trash', 'pro')}<span class="grow ttl pro">Abandonner la séance</span></button>`),
   abandon: () => { closeSheet(); setTimeout(() => confirmSheet('Abandonner la séance ? Les séries validées seront perdues.', 'Abandonner', () => { S.active = null; save(); hideRest(); releaseWake(); closeOv(); }, true), 250); },
   finish: () => finishWorkout(),
   restAdd: el => { REST.end += (+el.dataset.v) * 1000; REST.total = Math.max(REST.total, (REST.end - Date.now()) / 1000); REST.fired = false; const r = $('#rest'); if (r) r.classList.remove('end'); restTick(); },
@@ -62,7 +62,7 @@ const A = {
     const min = val('cd-min') || pl.day.dur, dist = val('cd-dist');
     const before = computeXP();
     S.workouts.push({ id: uid(), date, week: w, dow: d, kind: pl.day.k, title: pl.day.t, sub: pl.day.sub, dur: Math.round(min), cardio: { min: Math.round(min), dist: dist || 0, unit, rpe } });
-    invalidate(); save(); closeSheet(); closeOv(); confetti(70); haptic(2); toast(`${pl.day.t} validée · +${computeXP() - before} XP`);
+    invalidate(); save(); closeSheet(); closeOv(); confetti(70); haptic(2); toast(`${pl.day.t} : c\u2019est fait, bravo`);
   },
   undoDone: el => confirmSheet('Annuler la validation de cette séance ?', 'Annuler la validation', () => { S.workouts = S.workouts.filter(w => w.id !== el.dataset.v); invalidate(); save(); closeOv(); }, true),
   history: el => openHistory(el.dataset.v),
@@ -120,11 +120,13 @@ const A = {
   export: () => exportData(),
   reset: () => confirmSheet('Tout effacer ? Séances, repas, pesées et photos seront supprimés.', 'Tout effacer', () => { localStorage.removeItem(LS); try { indexedDB.deleteDatabase('fauve'); } catch (e) { /* ignore */ } location.reload(); }, true),
 
+  theme: el => { S.settings.theme = el.dataset.v; save(); applyTheme(); haptic(); render(); },
+
   /* Onboarding */
   onbNext: () => onbNext(),
   onbBack: () => { ONB.step = Math.max(0, ONB.step - 1); renderOnboarding(); },
   onbSex: el => { ONB.d.sex = el.dataset.v; $$('[data-a="onbSex"]').forEach(b => b.classList.toggle('on', b === el)); },
-  onbAct: el => { ONB.d.act = +el.dataset.v; $$('[data-a="onbAct"]').forEach(b => b.classList.toggle('on', b === el)); haptic(); },
+  onbAct: el => { ONB.d.act = +el.dataset.v; haptic(); renderOnboarding(); },
   onbGo: () => onbFinish()
 };
 A.addFood = () => {
@@ -173,7 +175,7 @@ async function exportData() {
   const name = `fauve-sauvegarde-${today()}.json`;
   const file = new File([data], name, { type: 'application/json' });
   const done = () => { S.lastExport = today(); save(); render(); toast('Sauvegarde créée'); };
-  try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'Sauvegarde FAUVE' }); return done(); } } catch (e) { if (e && e.name === 'AbortError') return; }
+  try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'Sauvegarde Fauve' }); return done(); } } catch (e) { if (e && e.name === 'AbortError') return; }
   const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = name; document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); done();
 }
@@ -196,10 +198,9 @@ function renderOnboarding() {
   const steps = `<div class="onb-steps">${[1, 2, 3].map(i => `<i class="${s >= i ? 'on' : ''}"></i>`).join('')}</div>`;
   let h = '';
   if (s === 0) {
-    h = `<div class="onb"><div class="onb-hero"><div class="logo" aria-label="FAUVE">${'FAUVE'.split('').map((c, i) => `<span style="animation-delay:${i * 70}ms">${c}</span>`).join('')}
-      <svg class="slash" viewBox="0 0 300 120" preserveAspectRatio="none" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"><path d="M150 4 Q120 60 70 116" style="animation-delay:.45s"/><path d="M200 4 Q170 62 122 118" style="animation-delay:.52s"/><path d="M250 6 Q220 64 174 118" style="animation-delay:.59s"/></svg></div>
-      <h1 class="h2" style="font-size:30px;margin-top:26px;max-width:15ch">18 semaines pour un physique esthétique et un corps prêt pour le MMA</h1>
-      <p class="sub" style="margin-top:12px;max-width:34ch">Programme salle, cage, piscine et course. Nutrition calculée pour toi. Tout s’ajuste à tes résultats.</p></div>
+    h = `<div class="onb"><div class="onb-hero"><img class="onb-icon" src="apple-touch-icon.png" alt=""><div class="onb-word">Fauve</div>
+      <h1 class="h2" style="font-size:26px;margin-top:14px;max-width:18ch;font-weight:600">Ton coach muscu et nutrition, dans ta poche.</h1>
+      <p class="sub" style="margin-top:12px;max-width:34ch">Un programme de 18 semaines : salle, plein air, piscine et course. Tes repas sont calculés pour toi et tout s\u2019ajuste à tes progrès.</p></div>
       <button class="btn pri block" data-a="onbNext">Commencer</button><p class="small" style="text-align:center;margin-top:10px">Tes données restent sur ton téléphone.</p></div>`;
   } else if (s === 1) {
     h = `<div class="onb">${steps}<div class="over">Étape 1 sur 3</div><h1 class="h1" style="margin-bottom:20px">Qui es-tu ?</h1>
@@ -209,16 +210,16 @@ function renderOnboarding() {
       <div style="flex:1"></div><div class="row" style="margin-top:24px"><button class="btn ghost" data-a="onbBack">${ic('back')}</button><button class="btn pri grow" data-a="onbNext">Continuer</button></div></div>`;
   } else if (s === 2) {
     h = `<div class="onb">${steps}<div class="over">Étape 2 sur 3</div><h1 class="h1" style="margin-bottom:8px">Ton quotidien</h1><p class="sub" style="margin-bottom:16px">En dehors du sport, tes journées ressemblent à :</p>
-      ${ACT.map(a => `<button class="card tight row ${d.act === a.v ? 'on' : ''}" style="width:100%;text-align:left;margin-bottom:10px;${d.act === a.v ? 'border-color:var(--fau)' : ''}" data-a="onbAct" data-v="${a.v}"><span class="grow"><span style="display:block;font-weight:700">${a.n}</span><span class="small">${a.d}</span></span></button>`).join('')}
+      ${ACT.map(a => `<button class="card row ${d.act === a.v ? 'on' : ''}" style="width:100%;text-align:left;margin:0 0 10px;padding:14px 16px;${d.act === a.v ? 'border-color:var(--acc2);box-shadow:0 0 0 1px var(--acc2)' : ''}" data-a="onbAct" data-v="${a.v}"><span class="grow"><span style="display:block;font-weight:700">${a.n}</span><span class="small">${a.d}</span></span></button>`).join('')}
       <div class="grid2" style="margin-top:8px"><div class="field"><label class="lbl" for="o-start">Début du programme</label><input id="o-start" type="date" class="inp" data-in="onb" data-f="start" value="${d.start}"></div><div class="field" style="margin-top:14px"><label class="lbl" for="o-mma">Premier cours de MMA</label><input id="o-mma" type="date" class="inp" data-in="onb" data-f="mma" value="${d.mma}"></div></div>
       <p class="small" style="margin-top:8px">Le programme démarre toujours un lundi. 18 semaines = 4 mois et demi.</p>
       <div style="flex:1"></div><div class="row" style="margin-top:24px"><button class="btn ghost" data-a="onbBack">${ic('back')}</button><button class="btn pri grow" data-a="onbNext">Voir mon plan</button></div></div>`;
   } else {
     const prof = onbProfile(); S.profile = prof; const t = targets(prof.start); S.profile = null;
     h = `<div class="onb">${steps}<div class="over">Étape 3 sur 3</div><h1 class="h1" style="margin-bottom:14px">Ton plan${prof.name ? `, ${esc(prof.name)}` : ''}</h1>
-      <div class="card"><div class="lbl">Calories par jour</div><div class="big num fau">${fmt(t.kcal)}</div><div class="grid3" style="margin-top:12px">${[['Protéines', t.prot], ['Glucides', t.carb], ['Lipides', t.fat]].map(([l, v]) => `<div><div class="lbl">${l}</div><div class="mid num">${v}<span class="small"> g</span></div></div>`).join('')}</div>
+      <div class="card"><div class="lbl">Calories par jour</div><div class="big num">${fmt(t.kcal)}</div><div class="grid3" style="margin-top:12px">${[['Protéines', t.prot], ['Glucides', t.carb], ['Lipides', t.fat]].map(([l, v]) => `<div><div class="lbl">${l}</div><div class="mid num">${v}<span class="small"> g</span></div></div>`).join('')}</div>
       <p class="small" style="margin:12px 0 0">Dépense estimée ${fmt(t.tdee)} kcal, déficit de ${fmt(t.deficit)} kcal : environ −${fmt(prof.weight * t.rate / 100, 2)} kg par semaine pour sécher sans perdre de muscle. L’appli réajuste selon ta courbe.</p></div>
-      <div class="card tight" style="margin-top:12px">${PHASES.map(p => `<div class="li"><span class="kico gym" style="font:900 18px var(--display)">${p.id}</span><span class="grow"><span class="ttl">${esc(p.name)} <span class="small">· ${p.to === 999 ? `dès le ${fdate(addDays(prof.start, (p.from - 1) * 7))}` : `${fdate(addDays(prof.start, (p.from - 1) * 7))} → ${fdate(addDays(prof.start, p.to * 7 - 1))}`}</span></span><span class="meta">${esc(p.goal)}</span></span></div>`).join('')}</div>
+      <div class="card tight" style="margin-top:12px">${PHASES.map(p => `<div class="li"><span class="kico gym" style="font:700 17px var(--display)">${p.id}</span><span class="grow"><span class="ttl">${esc(p.name)} <span class="small">· ${p.to === 999 ? `dès le ${fdate(addDays(prof.start, (p.from - 1) * 7))}` : `${fdate(addDays(prof.start, (p.from - 1) * 7))} → ${fdate(addDays(prof.start, p.to * 7 - 1))}`}</span></span><span class="meta">${esc(p.goal)}</span></span></div>`).join('')}</div>
       <div class="row" style="margin-top:24px"><button class="btn ghost" data-a="onbBack">${ic('back')}</button><button class="btn pri grow" data-a="onbGo">C’est parti</button></div></div>`;
   }
   $('#view').innerHTML = h; $('#view').style.padding = '0';
@@ -244,8 +245,8 @@ function onbFinish() {
   S.weights = [{ d: today(), kg: p.weight }];
   save(); saveNow();
   $('#view').style.padding = '';
-  confetti(); haptic(2); S.ui.tab = 'today'; render();
-  setTimeout(() => toast(p.age < 18 ? 'Moins de 18 ans : objectif maintien, pas de régime' : 'Bienvenue dans la cage 🔥'), 400);
+  confetti(); haptic(2); S.ui.tab = 'today'; render(); scrollTo(0, 0);
+  setTimeout(() => toast(p.age < 18 ? 'Moins de 18 ans : objectif maintien, pas de régime' : 'Bienvenue, on commence en douceur'), 400);
 }
 
 /* ================= Démarrage ================= */
@@ -262,6 +263,7 @@ function registerSW() {
 }
 let lastDay = today();
 function boot() {
+  applyTheme();
   document.addEventListener('touchstart', () => audio(), { once: true, passive: true });
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
   if (!S.profile) renderOnboarding();

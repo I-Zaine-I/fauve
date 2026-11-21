@@ -1,5 +1,5 @@
-/* FAUVE — service worker : l'app marche hors ligne (salle en sous-sol, piscine…) */
-const V = 'fauve-v1.0.0';
+/* Fauve — service worker : l'app marche hors ligne (salle en sous-sol, piscine…) */
+const V = 'fauve-v2.0.0';
 const CORE = ['./', 'index.html', 'styles.css', 'data.js', 'app.js', 'views.js', 'views2.js', 'boot.js',
   'manifest.webmanifest', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png', 'favicon.png'];
 const FONTS = 'fauve-fonts';

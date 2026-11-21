@@ -96,10 +96,10 @@ const EX = {
     cues: ['Coudes sous les épaules', 'Serre fessiers et abdos', 'Corps parfaitement aligné'], alt: ['ab_wheel'] },
   hang_leg_raise: { n: 'Relevés de jambes suspendu', eq: 'Barre fixe', bw: true, m: { abs: 1 }, inc: 0,
     cues: ['Pas de balancier', 'Enroule le bassin en montant', 'Genoux fléchis si trop dur'], alt: ['ab_wheel'] },
-  neck: { n: 'Cou : flexion + extension', eq: 'Disque / élastique', m: { neck: 1 }, inc: 1.25,
-    cues: ['Commence TRÈS léger (2,5–5 kg), serviette entre disque et tête', 'Allongé sur un banc : 1 série face au plafond, 1 série face au sol = 1 série', 'Amplitude contrôlée, jamais d’à-coups. Un cou fort encaisse mieux en MMA'], alt: [] },
+  neck: { n: 'Cou : flexion et extension', eq: 'Disque / élastique', m: { neck: 1 }, inc: 1.25,
+    cues: ['Commence TRÈS léger (2,5–5 kg), serviette entre disque et tête', 'Allongé sur un banc : 1 série face au plafond, 1 série face au sol = 1 série', 'Amplitude contrôlée, jamais d’à-coups. Utile pour la pratique du MMA'], alt: [] },
   farmer: { n: 'Farmer’s walk', eq: 'Haltères lourds', u: 'm', m: { abs: .5 }, inc: 2,
-    cues: ['Haltères lourds, épaules basses', 'Petits pas rapides, buste droit', 'Grip + gainage : indispensable pour le grappling'], alt: ['dead_hang'] },
+    cues: ['Haltères lourds, épaules basses', 'Petits pas rapides, buste droit', 'Travaille le grip et le gainage'], alt: ['dead_hang'] },
   dead_hang: { n: 'Suspension barre', eq: 'Barre fixe', bw: true, u: 's', m: {}, inc: 0,
     cues: ['Bras tendus, épaules engagées', 'Serre la barre fort', 'Ajoute une serviette autour de la barre pour le grip kimono'], alt: ['farmer'] },
   dips: { n: 'Dips', eq: 'Barres parallèles', bw: true, m: { tri: 1, chest: .5 }, inc: 2.5,
@@ -133,7 +133,7 @@ const REST_DAY = D('Repos actif', 'Récupération', 'rest', 30, [], [
 const PHASES = [
   {
     id: 1, name: 'Fondations', from: 1, to: 6, short: 'P1',
-    goal: 'Apprendre les mouvements, poser une base d’endurance et lancer la sèche.',
+    goal: 'On apprend les bons mouvements, on construit l’endurance et on lance la sèche en douceur.',
     rate: 0.6,
     days: [
       D('Haut A', 'Force', 'gym', 70, [
@@ -147,24 +147,24 @@ const PHASES = [
         'Technique : 8 × 50 m crawl, récup 30 s. Allonge-toi, expire sous l’eau',
         'Bloc continu : 600 à 1 000 m en aisance (tu pourrais parler)',
         'Retour au calme : 100 m dos ou brasse']),
-      D('Haut B', 'Volume · V-taper', 'gym', 70, [
+      D('Haut B', 'Volume · épaules et dos', 'gym', 70, [
         ['incline_db', 4, 8, 12, 1, 120], ['lat_pulldown', 3, 10, 12, 1, 90], ['cable_row', 3, 10, 12, 1, 90],
         ['cable_fly', 2, 12, 15, 1, 60], ['cable_lateral', 4, 12, 20, 1, 60], ['face_pull', 3, 15, 20, 1, 60],
         ['incline_curl', 3, 10, 12, 1, 60], ['oh_ext', 3, 10, 12, 1, 60]]),
-      D('Bas B', 'Volume · Cou · Grip', 'gym', 65, [
+      D('Bas B', 'Volume · gainage · grip', 'gym', 65, [
         ['trapbar', 3, 4, 6, 2, 180], ['leg_press', 3, 10, 15, 1, 120], ['hip_thrust', 3, 8, 12, 1, 90],
         ['leg_ext', 2, 12, 15, 1, 60], ['calf_seated', 3, 12, 20, 1, 60], ['neck', 2, 15, 20, 3, 60], ['farmer', 3, 30, 40, 2, 90]]),
-      D('Cage', 'Street workout · Course Z2', 'cage', 75, [
+      D('Street workout', 'Barres · course douce', 'cage', 75, [
         ['pullup', 3, 6, 12, 1, 120], ['dips', 3, 8, 12, 1, 90], ['pushup', 2, 12, 20, 2, 60], ['hang_leg_raise', 3, 8, 12, 1, 60]], [
-        'Après la cage : course zone 2, 30 à 40 min',
+        'Ensuite : course en zone 2, 30 à 40 min',
         'Allure : tu dois pouvoir parler en phrases complètes',
         'Fréquence cardiaque cible : voir Moi › Zones']),
       REST_DAY
     ]
   },
   {
-    id: 2, name: 'Forge', from: 7, to: 12, short: 'P2',
-    goal: 'Charges plus lourdes, plus de volume sur épaules et bras, fractionné.',
+    id: 2, name: 'Progression', from: 7, to: 12, short: 'P2',
+    goal: 'Des charges un peu plus lourdes, plus de travail pour les épaules et les bras, et du fractionné.',
     rate: 0.6,
     days: [
       D('Haut A', 'Force lourde', 'gym', 75, [
@@ -178,14 +178,14 @@ const PHASES = [
         '10 × 50 m rapide (8/10 d’effort), récup 30 s',
         '4 × 100 m allure soutenue, récup 20 s',
         'Retour au calme : 200 m souple']),
-      D('Haut B', 'Volume · V-taper+', 'gym', 75, [
+      D('Haut B', 'Volume · épaules et dos', 'gym', 75, [
         ['incline_db', 4, 8, 12, 1, 120], ['lat_pulldown', 4, 8, 12, 1, 90], ['chest_row', 3, 10, 12, 1, 90],
         ['cable_fly', 3, 12, 15, 1, 60], ['cable_lateral', 5, 12, 20, 1, 60], ['face_pull', 3, 15, 20, 1, 60],
         ['incline_curl', 3, 10, 12, 1, 60], ['oh_ext', 3, 10, 12, 1, 60]]),
-      D('Bas B', 'Volume · Cou · Grip', 'gym', 70, [
+      D('Bas B', 'Volume · gainage · grip', 'gym', 70, [
         ['trapbar', 4, 3, 5, 2, 180], ['leg_press', 3, 10, 15, 1, 120], ['hip_thrust', 3, 8, 12, 1, 90],
         ['leg_ext', 3, 12, 15, 1, 60], ['calf_seated', 3, 12, 20, 1, 60], ['neck', 3, 15, 20, 2, 60], ['farmer', 4, 30, 40, 2, 90]]),
-      D('Cage', 'Street workout · Fractionné', 'cage', 70, [
+      D('Street workout', 'Barres · fractionné', 'cage', 70, [
         ['pullup', 4, 6, 15, 1, 120], ['dips', 4, 8, 15, 1, 90], ['pike_pushup', 3, 8, 12, 1, 75], ['hang_leg_raise', 3, 10, 15, 1, 60]], [
         'Course fractionnée : 10 min de trot pour t’échauffer',
         '6 × 400 m rapide (allure 5 km), récup 90 s en marchant',
@@ -194,14 +194,14 @@ const PHASES = [
     ]
   },
   {
-    id: 3, name: 'Arme', from: 13, to: 18, short: 'P3',
-    goal: 'Puissance, explosivité et cardio de combat. Tu arrives prêt pour la cage.',
+    id: 3, name: 'Performance', from: 13, to: 18, short: 'P3',
+    goal: 'Puissance, explosivité et cardio. Tu arrives en pleine forme pour commencer le MMA.',
     rate: 0.4,
     days: [
-      D('Haut A', 'Force · Puissance', 'gym', 70, [
+      D('Haut A', 'Force et puissance', 'gym', 70, [
         ['mb_throw', 4, 5, 5, 3, 90], ['bench', 4, 3, 5, 2, 180], ['pullup', 4, 4, 6, 2, 150], ['ohp', 3, 5, 7, 2, 120],
         ['row', 3, 6, 8, 1, 120], ['lateral', 3, 12, 15, 1, 60], ['ez_curl', 2, 8, 10, 1, 60], ['pushdown', 2, 10, 12, 1, 60]]),
-      D('Bas A', 'Force · Explosivité', 'gym', 65, [
+      D('Bas A', 'Force et explosivité', 'gym', 65, [
         ['box_jump', 4, 3, 3, 3, 90], ['squat', 4, 3, 5, 2, 180], ['rdl', 3, 5, 7, 2, 150],
         ['bss', 3, 6, 8, 2, 90], ['calf', 3, 10, 15, 1, 60], ['ab_wheel', 3, 10, 15, 1, 60]]),
       D('Piscine', 'Anaérobie', 'swim', 45, [], [
@@ -212,37 +212,37 @@ const PHASES = [
       D('Haut B', 'Hypertrophie maintenue', 'gym', 65, [
         ['incline_db', 3, 8, 12, 1, 120], ['lat_pulldown', 3, 8, 12, 1, 90], ['cable_row', 3, 10, 12, 1, 90],
         ['cable_lateral', 4, 12, 20, 1, 60], ['face_pull', 3, 15, 20, 1, 60], ['incline_curl', 2, 10, 12, 1, 60], ['oh_ext', 2, 10, 12, 1, 60]]),
-      D('Bas B', 'Puissance · Cou · Grip', 'gym', 65, [
+      D('Bas B', 'Puissance · gainage · grip', 'gym', 65, [
         ['broad_jump', 3, 3, 3, 3, 90], ['trapbar', 3, 3, 5, 2, 180], ['kb_swing', 3, 12, 15, 2, 75], ['hip_thrust', 3, 8, 10, 1, 90],
         ['neck', 3, 15, 20, 2, 60], ['farmer', 3, 40, 40, 2, 90], ['dead_hang', 3, 30, 60, 2, 60]]),
-      D('Cage', 'Fight conditioning', 'cage', 70, [
+      D('Circuit cardio', 'Barres · intervalles', 'cage', 70, [
         ['pullup', 3, 6, 15, 1, 120], ['dips', 3, 8, 20, 1, 90]], [
         'Échauffement 8 min : corde à sauter ou jumping jacks + mobilité',
-        '5 rounds × 5 min, récup 1 min (format MMA) avec le chrono Rounds :',
-        '· 1 min de shadow boxing (jab, direct, crochet, déplacements)',
+        '5 tours de 5 min, récup 1 min, avec le chrono intervalles :',
+        '· 1 min de shadow boxing léger (bras et déplacements)',
         '· 10 sprawls + 10 burpees',
         '· 1 min de marche de l’ours avant/arrière',
         '· 15 squats sautés + 20 mountain climbers',
-        '· Fin du round : shadow boxing à haut rythme',
+        '· Fin du tour : shadow boxing à rythme soutenu',
         'Finisher : 8 sprints de 15 s, récup 45 s'], { timer: 'mma5' }),
       REST_DAY
     ]
   },
   {
-    id: 4, name: 'Cage', from: 19, to: 999, short: 'MMA',
-    goal: 'Tu as commencé le MMA : 2 séances de force pour garder le muscle, le reste sur le tapis.',
+    id: 4, name: 'Entretien', from: 19, to: 999, short: 'P4',
+    goal: 'Tu as commencé le MMA : 2 séances de force par semaine suffisent pour garder tes acquis.',
     rate: 0,
     days: [
       D('Full body A', 'Force', 'gym', 60, [
         ['squat', 3, 4, 6, 2, 180], ['bench', 3, 4, 6, 2, 180], ['pullup', 3, 5, 8, 2, 150],
         ['rdl', 2, 6, 8, 2, 120], ['lateral', 3, 12, 15, 1, 60], ['neck', 2, 15, 20, 2, 60]]),
-      D('MMA', 'Cours', 'mma', 90, [], ['Cours de MMA ou de grappling', 'Bois 0,5 à 1 L d’eau par heure de cours', 'Repas riche en glucides 2–3 h avant']),
+      D('Cours de MMA', 'Technique', 'mma', 90, [], ['Cours de MMA ou de grappling', 'Bois 0,5 à 1 L d’eau par heure de cours', 'Repas riche en glucides 2 à 3 h avant']),
       D('Full body B', 'Puissance', 'gym', 60, [
         ['box_jump', 3, 3, 3, 3, 90], ['trapbar', 3, 3, 5, 2, 180], ['incline_db', 3, 8, 10, 1, 120],
         ['row', 3, 8, 10, 1, 120], ['cable_lateral', 3, 12, 20, 1, 60], ['farmer', 3, 40, 40, 2, 90]]),
-      D('MMA', 'Cours', 'mma', 90, [], ['Cours de MMA ou de grappling', 'Travaille ce que tu as raté la dernière fois']),
+      D('Cours de MMA', 'Technique', 'mma', 90, [], ['Cours de MMA ou de grappling', 'Reprends ce qui t\u2019a posé problème la dernière fois']),
       D('Piscine', 'Récupération', 'swim', 30, [], ['30 min de nage facile, zone 2', 'Étirements doux après']),
-      D('MMA', 'Sparring / open mat', 'mma', 90, [], ['Sparring léger ou open mat', 'Protège-dents et coquille obligatoires']),
+      D('Cours de MMA', 'Pratique libre', 'mma', 90, [], ['Pratique libre ou sparring léger', 'Protections obligatoires']),
       REST_DAY
     ]
   }
@@ -255,10 +255,10 @@ const DOW = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Diman
 const DOW_S = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 
 const TIMERS = {
-  mma5: { n: 'MMA pro', rounds: 5, work: 300, rest: 60 },
-  mma3: { n: 'MMA amateur', rounds: 3, work: 300, rest: 60 },
-  box3: { n: 'Boxe', rounds: 3, work: 180, rest: 60 },
-  r53: { n: 'Rounds courts', rounds: 5, work: 180, rest: 60 },
+  mma5: { n: '5 × 5 min', rounds: 5, work: 300, rest: 60 },
+  mma3: { n: '3 × 5 min', rounds: 3, work: 300, rest: 60 },
+  hiit: { n: 'HIIT 40/20', rounds: 10, work: 40, rest: 20 },
+  r53: { n: '5 × 3 min', rounds: 5, work: 180, rest: 60 },
   tabata: { n: 'Tabata', rounds: 8, work: 20, rest: 10 }
 };
 
@@ -360,17 +360,17 @@ const PLANS = [
 ];
 
 const RANKS = [
-  [0, 'Recrue'], [600, 'Apprenti'], [1600, 'Combattant'], [3200, 'Guerrier'],
-  [5500, 'Prédateur'], [8500, 'Fauve'], [12500, 'Bête'], [18000, 'Légende']
+  [0, 'Débutant'], [600, 'Lancé'], [1600, 'Régulier'], [3200, 'Assidu'],
+  [5500, 'Solide'], [8500, 'Athlète'], [12500, 'Confirmé'], [18000, 'Élite']
 ];
 
 /* Guide : principes appuyés sur la littérature */
 const GUIDE = [
   { t: 'Perdre du gras sans perdre de muscle', p: [
-    'Vise une perte de 0,5 à 1 % de ton poids par semaine. Plus vite, tu perds davantage de muscle. FAUVE démarre à ~0,6 %/semaine puis ralentit en phase 3.',
+    'Vise une perte de 0,5 à 1 % de ton poids par semaine. Plus vite, tu perds davantage de muscle. Fauve démarre à ~0,6 %/semaine puis ralentit en phase 3.',
     'Le poids fluctue chaque jour (eau, sel, glucides). L’appli lisse tes pesées en tendance : seule la tendance compte. Pèse-toi le matin, à jeun, après les toilettes.'],
     src: [['Helms et al. 2014, JISSN', 'https://pubmed.ncbi.nlm.nih.gov/24864135/']] },
-  { t: 'Protéines : le non-négociable', p: [
+  { t: 'Les protéines, la base', p: [
     '1,4 à 2,0 g/kg suffisent pour la plupart des sportifs ; en déficit calorique, monter plus haut aide à garder le muscle. Ta cible : 2,2 g/kg pendant la sèche.',
     'Répartis-les sur 3 à 4 repas d’environ 0,4 g/kg (≈ 35–45 g), dont un avant et un après l’entraînement.'],
     src: [['ISSN 2017 : protéines et exercice', 'https://pubmed.ncbi.nlm.nih.gov/28642676/'], ['Helms et al. 2014', 'https://pubmed.ncbi.nlm.nih.gov/24864135/']] },
@@ -389,7 +389,7 @@ const GUIDE = [
     'Combiner cardio et musculation ne freine pas la prise de muscle ni la force globale ; seule la puissance peut être un peu atténuée.',
     'L’interférence semble plus marquée avec la course qu’avec le vélo. D’où le planning : natation (sans impact) en milieu de semaine, course le samedi loin des séances de jambes lourdes.'],
     src: [['Schumann et al. 2022, Sports Med', 'https://link.springer.com/article/10.1007/s40279-021-01587-7'], ['Lundberg et al. 2022 (fibres)', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC9474354']] },
-  { t: 'Sommeil : le stéroïde légal', p: [
+  { t: 'Le sommeil, ton meilleur allié', p: [
     'À déficit identique, dormir 5,5 h au lieu de 8,5 h a réduit de 55 % la part de gras perdu, au profit du muscle. Vise 8 h, heures fixes, chambre fraîche et noire.'],
     src: [['Stronger By Science : Nedeltcheva 2010', 'https://www.strongerbyscience.com/sleep-pt-1/']] },
   { t: 'Compléments qui marchent', p: [
@@ -399,11 +399,11 @@ const GUIDE = [
     src: [['ISSN 2017 : créatine', 'https://pubmed.ncbi.nlm.nih.gov/28615996/'], ['ISSN 2021 : caféine', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC7777221']] },
   { t: 'Calories : point de départ, puis ajustement', p: [
     'La formule de Mifflin-St Jeor est la plus fiable pour estimer ta dépense au repos, mais elle se trompe de plus de 10 % pour environ un tiers des gens.',
-    'FAUVE part de cette estimation, puis compare chaque semaine ta tendance de poids à l’objectif et te propose d’ajuster de 100 à 200 kcal.'],
+    'Fauve part de cette estimation, puis compare chaque semaine ta tendance de poids à l’objectif et te propose d’ajuster de 100 à 200 kcal.'],
     src: [['Frankenfield et al.', 'https://pubmed.ncbi.nlm.nih.gov/23631843/']] },
-  { t: 'Prépa MMA', p: [
-    'Le MMA sollicite toutes les filières énergétiques ; les combattants qui réussissent se distinguent par la force maximale, la puissance et la capacité anaérobie.',
-    'D’où la phase 3 : sauts, lancers, sprints et rounds de 5 min. Le renforcement du cou est recommandé par un consensus d’experts pour mieux encaisser les impacts à la tête.'],
+  { t: 'Se préparer pour le MMA', p: [
+    'Le MMA sollicite toutes les filières énergétiques ; les meilleurs pratiquants se distinguent par la force maximale, la puissance et la capacité anaérobie.',
+    'D’où la phase 3 : sauts, lancers, sprints et intervalles de 5 min. Le renforcement du cou est recommandé par un consensus d’experts pour mieux encaisser les impacts à la tête.'],
     src: [['James et al. 2016, Sports Med', 'https://pubmed.ncbi.nlm.nih.gov/26993133/'], ['Consensus Delphi 2025, BJSM', 'https://shura.shu.ac.uk/35723/']] },
   { t: 'La motivation, ça se construit', p: [
     'Une habitude met en médiane 2 mois à s’installer (59 à 66 jours), avec d’énormes écarts entre les gens. Les 8 premières semaines sont les plus dures, ensuite ça roule tout seul.',
@@ -411,12 +411,15 @@ const GUIDE = [
     src: [['Méta-analyse 2024, Healthcare', 'https://www.mdpi.com/3079492'], ['Implementation intentions, méta-analyse', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC6235272']] }
 ];
 
-const QUOTES = [
-  'La discipline, c’est choisir ce que tu veux le plus plutôt que ce que tu veux maintenant.',
-  'Personne ne viendra le faire à ta place.',
-  'Le fauve ne négocie pas avec la flemme.',
-  'Petit pas, tous les jours. La régularité bat l’intensité.',
-  'Tu ne te lèves pas motivé. Tu te lèves et tu y vas.',
-  'Chaque série compte. Chaque repas compte.',
-  'Le corps que tu veux se construit les jours où tu n’as pas envie.'
+const TIPS = [
+  'Bois un grand verre d\u2019eau au réveil, avant le café.',
+  'Ajoute une portion de légumes à chaque repas : volume, fibres, satiété.',
+  'Vise 8 h de sommeil. C\u2019est la nuit que le muscle se reconstruit.',
+  'Prépare ce soir les repas de demain : la régularité commence en cuisine.',
+  'Marche 10 minutes après le dîner, ça aide la digestion et les pas du jour.',
+  'Une séance moyenne vaut mieux qu\u2019une séance parfaite jamais faite.',
+  'Garde une source de protéines à chaque repas, c\u2019est le plus simple.',
+  'Note tes sensations après la séance : tu progresseras plus vite.',
+  'Pèse-toi le matin, à jeun : seule la tendance sur 2 semaines compte.',
+  'Échauffe-toi 5 à 10 minutes avant de charger lourd.'
 ];

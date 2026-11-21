@@ -1,26 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
   <defs>
-    <radialGradient id="bg" cx="50%" cy="62%" r="70%">
-      <stop offset="0" stop-color="#3B1609"/>
-      <stop offset=".55" stop-color="#140D0B"/>
-      <stop offset="1" stop-color="#0A0A0B"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3FD49C"/>
+      <stop offset="1" stop-color="#11785A"/>
+    </linearGradient>
+    <radialGradient id="gl" cx="30%" cy="20%" r="70%">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="oc" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#FF8A4C"/>
-      <stop offset="1" stop-color="#FF3B12"/>
-    </linearGradient>
-    <linearGradient id="cl" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#FFFFFF"/>
-      <stop offset="1" stop-color="#E9E2D6"/>
-    </linearGradient>
   </defs>
   <rect width="1024" height="1024" fill="url(#bg)"/>
-  <g id="art">
-    <path d="M371.2 172 L652.8 172 L852 371.2 L852 652.8 L652.8 852 L371.2 852 L172 652.8 L172 371.2 Z" fill="none" stroke="url(#oc)" stroke-width="46" stroke-linejoin="round"/>
-    <g fill="url(#cl)" transform="translate(-52 -8)">
-      <path d="M548 250 Q470 500 326 778 Q520 520 590 262 Z"/>
-      <path d="M660 262 Q585 520 438 800 Q636 540 702 276 Z"/>
-      <path d="M766 300 Q700 540 560 790 Q742 560 800 318 Z"/>
-    </g>
+  <rect width="1024" height="1024" fill="url(#gl)"/>
+  <g id="art" fill="none" stroke="#FFFFFF" stroke-linecap="round">
+    <!-- anneau extérieur ~80 % -->
+    <circle cx="512" cy="512" r="300" stroke-width="86" stroke-dasharray="1508 1885" transform="rotate(-90 512 512)"/>
+    <!-- anneau intérieur ~60 %, plus doux -->
+    <circle cx="512" cy="512" r="170" stroke-width="86" stroke-opacity=".55" stroke-dasharray="641 1068" transform="rotate(-90 512 512)"/>
   </g>
 </svg>

@@ -33,62 +33,62 @@ function go(tab) {
 /* ================= Poster ================= */
 function poster(o) {
   const open = o.open ? `data-a="${o.open[0]}" ${o.open[1] || ''} role="button" tabindex="0"` : '';
-  return `<article class="poster k-${o.kind} anim-in" ${open}>${CLAW}
-    <div class="p-top"><span>${o.top}</span>${o.done ? `<span class="p-chip">${ic('check')}</span>` : ''}</div>
-    <div class="p-title">${esc(o.title)}</div><div class="p-sub">${esc(o.sub)}</div>
-    <div class="p-meta">${(o.chips || []).map(c => `<span class="p-chip">${c}</span>`).join('')}</div>
+  return `<article class="hero k-${o.kind} anim-in" ${open}>
+    <div class="hero-top"><span>${o.top}</span>${o.done ? `<span class="tag done">${ic('check')} Faite</span>` : ''}</div>
+    <div class="hero-main"><div class="grow"><div class="hero-t">${esc(o.title)}</div><div class="hero-s">${esc(o.sub)}</div></div><div class="hero-ic">${ic(KIND_IC[o.kind] || 'dumbbell')}</div></div>
+    <div class="chips">${(o.chips || []).map(c => `<span class="tag">${c}</span>`).join('')}</div>
     ${o.btn ? `<button class="btn pri block" data-a="${o.btn[0]}" ${o.btn[2] || ''}>${o.btn[1]}</button>` : ''}</article>`;
 }
 function posterToday(k, pl) {
   const p = S.profile;
   if (!pl) {
     const n = diffDays(k, p.start);
-    return poster({ kind: 'pre', top: `Départ dans ${n} jour${n > 1 ? 's' : ''}`, title: 'Avant-match', sub: `Le programme démarre ${DOW[dowOf(p.start)].toLowerCase()} ${fdate(p.start)}`,
+    return poster({ kind: 'pre', top: `Départ dans ${n} jour${n > 1 ? 's' : ''}`, title: 'Prépare ton départ', sub: `Le programme démarre ${DOW[dowOf(p.start)].toLowerCase()} ${fdate(p.start)}`,
       chips: ['Tests de départ', 'Photos', 'Mensurations'], btn: ['tests', `${ic('flag')} Faire les tests de départ`] });
   }
-  const d = pl.day, done = doneFor(pl.week, pl.dow), mma = diffDays(k, p.mma);
+  const d = pl.day, done = doneFor(pl.week, pl.dow);
   const chips = [`${d.dur} min`, KIND_N[d.k]];
   if (d.ex.length) chips.push(`${d.ex.length} exercices`);
   if (pl.deload) chips.push('Décharge');
   if (S.slots[pl.dow]) chips.push(`${ic('clock')} ${esc(S.slots[pl.dow])}`);
   const attrs = `data-w="${pl.week}" data-d="${pl.dow}"`;
   let btn;
-  if (done) btn = ['session', `${ic('check')} Séance validée · voir`, attrs];
-  else if (d.k === 'gym' || d.k === 'cage') btn = S.active && S.active.week === pl.week && S.active.dow === pl.dow ? ['resume', `${ic('play')} Reprendre la séance`] : ['start', `${ic('play')} Démarrer la séance`, attrs];
-  else btn = ['session', d.k === 'rest' ? 'Voir le repos actif' : `${ic('play')} Voir la séance`, attrs];
-  return poster({ kind: d.k, top: `${esc(pl.ph.name)} · ${mma > 0 ? `J-${mma} avant le MMA` : 'Mode MMA'}`, title: d.t, sub: d.sub, chips, done: !!done, btn, open: ['session', attrs] });
+  if (done) btn = ['session', 'Voir la séance', attrs];
+  else if (d.k === 'gym' || d.k === 'cage') btn = S.active && S.active.week === pl.week && S.active.dow === pl.dow ? ['resume', 'Reprendre la séance'] : ['start', 'Commencer la séance', attrs];
+  else btn = ['session', d.k === 'rest' ? 'Voir le programme du jour' : 'Voir la séance', attrs];
+  return poster({ kind: d.k, top: `Séance du jour · semaine ${pl.week}`, title: d.t, sub: d.sub, chips, done: !!done, btn, open: ['session', attrs] });
 }
 
 /* ================= Aujourd'hui ================= */
 function vToday() {
   const k = today(), p = S.profile, pl = planOn(k), t = targets(k), n = dayNut(k), st = streak(), xp = computeXP(), rk = rankOf(xp);
   const hr = new Date().getHours(); const hello = hr < 5 ? 'Bonne nuit' : hr < 12 ? 'Bonjour' : hr < 18 ? 'Salut' : 'Bonsoir';
-  let h = `<header class="hd"><div><div class="over">${fdateL(k)}${pl ? ` · semaine ${pl.week}` : ''}</div><h1 class="h1">${hello}${p.name ? `<br>${esc(p.name)}` : ''}</h1></div>
-    <div class="hd-r"><button class="chip" data-a="streakInfo" aria-label="Série de jours validés">${ic('flame', 'fau')}<span class="streak num">${st}</span></button></div></header>`;
-  if (!isStandalone() && !S.dismiss.install) h += `<div class="card tight install anim-in" style="margin-bottom:12px">${ic('share')}<div class="grow small" style="color:var(--ink)">Installe FAUVE : dans Safari, touche <b>Partager</b> puis <b>Sur l’écran d’accueil</b>.</div><button class="ibtn" data-a="dismiss" data-v="install" aria-label="Masquer">${ic('x')}</button></div>`;
-  if (S.active) h += `<button class="card tight row anim-in" style="width:100%;margin-bottom:12px;text-align:left;border-color:rgba(255,75,31,.4)" data-a="resume"><span class="kico gym">${ic('dumbbell')}</span><span class="grow"><span class="ttl" style="display:block;font-weight:700">Séance en cours · ${esc(S.active.title)}</span><span class="small">Démarrée à ${new Date(S.active.start).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span></span><span class="tag fau">Reprendre</span></button>`;
+  let h = `<header class="hd"><div><div class="over">${fdateL(k)}${pl ? ` · ${esc(pl.ph.name)}` : ''}</div><h1 class="h1">${hello}${p.name ? ` ${esc(p.name)}` : ''}</h1></div>
+    <div class="hd-r"><button class="chip" data-a="streakInfo" aria-label="Série de jours réussis" style="background:var(--s1);box-shadow:var(--shadow)">${ic('flame', 'sand')}<span class="streak num">${st}</span></button></div></header>`;
+  if (!isStandalone() && !S.dismiss.install) h += `<div class="card install anim-in" style="margin-bottom:12px;padding:12px 14px">${ic('share')}<div class="grow small" style="color:var(--ink)">Installe Fauve : dans Safari, touche <b>Partager</b> puis <b>Sur l’écran d’accueil</b>.</div><button class="ibtn" data-a="dismiss" data-v="install" aria-label="Masquer">${ic('x')}</button></div>`;
+  if (S.active) h += `<button class="card tight row anim-in" style="width:100%;margin-bottom:12px;text-align:left;border-color:var(--acc2)" data-a="resume"><span class="kico gym">${ic('dumbbell')}</span><span class="grow"><span class="ttl" style="display:block;font-weight:700">Séance en cours · ${esc(S.active.title)}</span><span class="small">Démarrée à ${new Date(S.active.start).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span></span><span class="tag fau">Reprendre</span></button>`;
   h += posterToday(k, pl);
-  h += sec('Carburant', `<button class="link" data-a="tab" data-v="food">Journal ›</button>`) + nutCard(t, n);
+  h += sec('Nutrition', `<button class="link" data-a="tab" data-v="food">Journal</button>`) + nutCard(t, n);
   const sug = adaptSuggestion(); if (sug) h += adaptCard(sug);
   const ms = missions(k);
-  h += sec('Missions', `<span class="small num">${ms.filter(m => m.ok).length}/${ms.length}</span>`) + `<div class="card tight">${ms.map(missionRow).join('')}</div>`;
-  h += sec('Ta semaine') + weekCard(k);
+  h += sec('Objectifs du jour', `<span class="small num">${ms.filter(m => m.ok).length} sur ${ms.length}</span>`) + `<div class="card tight">${ms.map(missionRow).join('')}</div>`;
+  h += sec('Cette semaine') + weekCard(k);
   h += levelCard(xp, rk, st);
   const needBackup = S.workouts.length >= 5 && (!S.lastExport || diffDays(S.lastExport, k) > 14);
   if (needBackup) h += `<div class="card tight row" style="margin-top:12px">${ic('download', 'sand')}<div class="grow small" style="color:var(--ink)">Pense à sauvegarder tes données (elles ne vivent que sur ce téléphone).</div><button class="btn sm" data-a="export">Sauver</button></div>`;
-  h += `<p class="quote">${esc(QUOTES[Math.abs(diffDays(S.created, k)) % QUOTES.length])}</p>`;
+  h += `<div class="card tip" style="margin-top:12px"><span class="tip-ic">${ic('sparkle')}</span><div><div class="lbl">Conseil du jour</div><div style="margin-top:2px">${esc(TIPS[Math.abs(diffDays(S.created, k)) % TIPS.length])}</div></div></div>`;
   return h;
 }
 function nutCard(t, n) {
   const left = t.kcal - n.kcal;
-  const center = `<div class="mid num">${fmt(Math.abs(left))}</div><div class="small" style="font-size:11px;line-height:1.15;margin-top:3px">kcal<br>${left >= 0 ? 'restantes' : 'en trop'}</div>`;
-  return `<div class="card" data-a="tab" data-v="food" role="button"><div class="nut-hero">${ring(148, [{ pct: n.p / t.prot, color: 'var(--fau)' }, { pct: n.c / t.carb, color: 'var(--cob)' }, { pct: n.f / t.fat, color: 'var(--sand)' }], 11, 4, center)}
-    <div>${macroRow('Protéines', n.p, t.prot, 'var(--fau)', '')}${macroRow('Glucides', n.c, t.carb, 'var(--cob)', 'cob')}${macroRow('Lipides', n.f, t.fat, 'var(--sand)', 'sand')}</div></div></div>`;
+  const center = `<div class="mid num" style="font-size:23px">${fmt(Math.abs(left))}</div><div class="small" style="font-size:11px;line-height:1.2;margin-top:3px">kcal<br>${left >= 0 ? 'restantes' : 'en plus'}</div>`;
+  return `<div class="card" data-a="tab" data-v="food" role="button"><div class="nut-hero">${ring(148, [{ pct: n.p / t.prot, color: 'var(--pro)' }, { pct: n.c / t.carb, color: 'var(--carb)' }, { pct: n.f / t.fat, color: 'var(--fat)' }], 10, 3.5, center)}
+    <div>${macroRow('Protéines', n.p, t.prot, 'var(--pro)', 'pro')}${macroRow('Glucides', n.c, t.carb, 'var(--carb)', 'cob')}${macroRow('Lipides', n.f, t.fat, 'var(--fat)', 'sand')}</div></div></div>`;
 }
-const macroRow = (name, v, tgt, col, cls) => `<div class="macro"><span class="dot" style="background:${col}"></span><span class="lbl">${name}</span><span class="small num"><b style="color:var(--ink)">${fmt(v)}</b> / ${fmt(tgt)} g</span>${bar(v / (tgt || 1), cls)}</div>`;
-const adaptCard = s => `<div class="card" style="margin-top:12px;border-color:rgba(255,75,31,.35)"><div class="row" style="margin-bottom:8px">${ic('sparkle', 'fau')}<span class="h3">Ajustement proposé</span></div><p class="sub">${esc(s.msg)}</p>
+const macroRow = (name, v, tgt, col, cls) => `<div class="macro"><div class="row sb" style="gap:6px;margin-bottom:6px"><span class="lbl row" style="gap:7px"><span class="dot" style="background:${col}"></span>${name}</span><span class="small num nowrap"><b style="color:var(--ink)">${fmt(v)}</b>/${fmt(tgt)} g</span></div>${bar(v / (tgt || 1), cls)}</div>`;
+const adaptCard = s => `<div class="card" style="margin-top:12px"><div class="row" style="margin-bottom:8px">${ic('sparkle', 'fau')}<span class="h3">Ajustement proposé</span></div><p class="sub">${esc(s.msg)}</p>
   <div class="row"><button class="btn pri sm grow" data-a="adapt" data-v="${s.delta}">${s.delta > 0 ? '+' : '−'}${Math.abs(s.delta)} kcal / jour</button><button class="btn ghost sm" data-a="adaptLater">Plus tard</button></div></div>`;
-const missionRow = m => `<button class="mission ${m.ok ? 'ok' : ''}" data-a="${m.a}" data-v="${m.v == null ? '' : m.v}"><span class="mk">${ic(m.ok ? 'octoCheck' : 'octo')}</span><span class="grow"><span class="mt">${esc(m.t)}</span><span class="ms">${esc(m.s)}</span></span><span class="xp">+${m.xp} XP</span></button>`;
+const missionRow = m => `<button class="mission ${m.ok ? 'ok' : ''}" data-a="${m.a}" data-v="${m.v == null ? '' : m.v}"><span class="mk">${ic(m.ok ? 'circleCheck' : 'circle')}</span><span class="grow"><span class="mt">${esc(m.t)}</span><span class="ms">${esc(m.s)}</span></span><span class="xp">+${m.xp}</span></button>`;
 function weekCard(k) {
   const mon = mondayOf(k); let cells = '';
   for (let i = 0; i < 7; i++) {
@@ -100,24 +100,24 @@ function weekCard(k) {
   return `<div class="card tight"><div class="week">${cells}</div></div>`;
 }
 function levelCard(xp, rk, st) {
-  return `<div class="card" style="margin-top:12px"><div class="lvl"><div class="badge"><svg viewBox="0 0 58 58"><path d="${octPath(29, 29, 27)}" fill="var(--fau)"/></svg><span style="position:relative">${rk.lvl}</span></div>
-    <div class="grow"><div class="lbl">Rang</div><div class="h2" style="font-size:28px">${esc(rk.name)}</div><div style="margin:8px 0 6px">${bar(rk.pct)}</div>
-    <div class="small num">${fmt(xp)} XP${rk.next ? ` · encore ${fmt(rk.to - xp)} XP avant ${esc(rk.next)}` : ' · rang maximal'}</div></div></div>
-    <div class="sep"></div><div class="row sb small"><span>${ic('flame', 'fau')}</span><span class="grow" style="color:var(--ink)">Série : <b class="num">${st}</b> jour${st > 1 ? 's' : ''} validé${st > 1 ? 's' : ''}</span><span>séance + protéines</span></div></div>`;
+  return `<div class="card" style="margin-top:12px"><div class="lvl"><div class="badge">${ring(56, [{ pct: rk.pct, color: 'var(--acc2)' }], 5, 0, '')}<span style="position:absolute;inset:0;display:grid;place-items:center">${rk.lvl}</span></div>
+    <div class="grow"><div class="lbl">Niveau ${rk.lvl}</div><div class="h2" style="font-size:24px">${esc(rk.name)}</div><div style="margin:8px 0 6px">${bar(rk.pct)}</div>
+    <div class="small num">${fmt(xp)} points${rk.next ? ` · encore ${fmt(rk.to - xp)} avant <span class="nowrap">« ${esc(rk.next)} »</span>` : ' · niveau maximal'}</div></div></div>
+    <div class="sep"></div><div class="row sb small"><span>${ic('flame', 'sand')}</span><span class="grow" style="color:var(--ink)">Série : <b class="num">${st}</b> jour${st > 1 ? 's' : ''} réussi${st > 1 ? 's' : ''}</span><span>séance + protéines</span></div></div>`;
 }
 
 /* ================= Programme ================= */
 function vTrain() {
   const k = today(), cw = Math.max(1, weekOf(k)), maxW = Math.max(PROGRAM_WEEKS + 4, cw + 2);
   const w = clamp(S.ui.week || cw, 1, maxW), ph = phaseOfWeek(w);
-  let h = `<header class="hd"><div><div class="over">18 semaines · 4 phases</div><h1 class="h1">Programme</h1></div></header>`;
+  let h = `<header class="hd"><div><div class="over">18 semaines, 3 phases</div><h1 class="h1">Programme</h1></div></header>`;
   const fills = PHASES.map(p => p.id === 4 ? clamp((cw - 18) / 6, 0, 1) : clamp((cw - p.from + 1) / (p.to - p.from + 1), 0, 1));
-  h += `<div class="card"><div class="over">Phase ${ph.id} · ${ph.to === 999 ? `dès la semaine ${ph.from}` : `semaines ${ph.from} à ${ph.to}`}</div><div class="h2" style="font-size:34px;margin:4px 0 6px">${esc(ph.name)}</div><p class="sub" style="margin:0">${esc(ph.goal)}</p>
+  h += `<div class="card"><div class="over">Phase ${ph.id} · ${ph.to === 999 ? `dès la semaine ${ph.from}` : `semaines ${ph.from} à ${ph.to}`}</div><div class="h1" style="font-size:30px;margin:4px 0 8px">${esc(ph.name)}</div><p class="sub" style="margin:0">${esc(ph.goal)}</p>
     <div class="tl">${fills.map(f => `<div class="tl-seg"><i style="width:${(f * 100).toFixed(0)}%"></i></div>`).join('')}</div>
     <div class="tl-l">${PHASES.map(p => `<span class="${p.id === ph.id ? 'on' : ''}">${esc(p.name)}</span>`).join('')}</div></div>`;
   const tags = []; if (w === cw) tags.push('<span class="tag fau">En cours</span>'); if (DELOAD_WEEKS.includes(w)) tags.push('<span class="tag cob">Décharge</span>'); if (TEST_WEEKS.includes(w)) tags.push('<span class="tag sand">Tests</span>');
   h += `<div class="row" style="margin:22px 0 10px"><button class="ibtn" data-a="weekNav" data-v="-1" ${w <= 1 ? 'disabled style="opacity:.3"' : ''} aria-label="Semaine précédente">${ic('back')}</button>
-    <div class="grow" style="text-align:center"><div class="h2">Semaine ${w}</div><div class="small">${fdate(dateFor(w, 0))} – ${fdate(dateFor(w, 6))}</div><div class="chips" style="justify-content:center;margin-top:6px">${tags.join('')}</div></div>
+    <div class="grow" style="text-align:center"><div class="h2" style="font-size:22px">Semaine ${w}</div><div class="small">${fdate(dateFor(w, 0))} – ${fdate(dateFor(w, 6))}</div><div class="chips" style="justify-content:center;margin-top:6px">${tags.join('')}</div></div>
     <button class="ibtn" data-a="weekNav" data-v="1" ${w >= maxW ? 'disabled style="opacity:.3"' : ''} aria-label="Semaine suivante">${ic('next')}</button></div>`;
   h += `<div class="card tight stagger">`;
   for (let i = 0; i < 7; i++) {
@@ -126,10 +126,10 @@ function vTrain() {
   }
   h += `</div>`;
   h += sec('Outils') + `<div class="grid2">
-    <button class="card tight" style="text-align:left" data-a="timer" data-v="mma5">${ic('timer', 'fau')}<div class="h3" style="margin-top:8px">Chrono rounds</div><div class="small">MMA, boxe, Tabata</div></button>
-    <button class="card tight" style="text-align:left" data-a="library">${ic('book', 'fau')}<div class="h3" style="margin-top:8px">Exercices</div><div class="small">Placements & conseils</div></button>
-    <button class="card tight" style="text-align:left" data-a="tests">${ic('flag', 'fau')}<div class="h3" style="margin-top:8px">Tests</div><div class="small">Semaines 1 et 18</div></button>
-    <button class="card tight" style="text-align:left" data-a="slots">${ic('clock', 'fau')}<div class="h3" style="margin-top:8px">Créneaux</div><div class="small">Planifie tes séances</div></button></div>`;
+    <button class="card" style="text-align:left;padding:16px" data-a="timer" data-v="mma5">${ic('timer', 'fau')}<div class="h3" style="margin-top:10px">Chrono</div><div class="small">Intervalles, HIIT, Tabata</div></button>
+    <button class="card" style="text-align:left;padding:16px;margin:0" data-a="library">${ic('book', 'fau')}<div class="h3" style="margin-top:10px">Exercices</div><div class="small">Placements et conseils</div></button>
+    <button class="card" style="text-align:left;padding:16px;margin:0" data-a="tests">${ic('flag', 'fau')}<div class="h3" style="margin-top:10px">Tests</div><div class="small">Semaines 1 et 18</div></button>
+    <button class="card" style="text-align:left;padding:16px;margin:0" data-a="slots">${ic('clock', 'fau')}<div class="h3" style="margin-top:10px">Créneaux</div><div class="small">Planifie tes séances</div></button></div>`;
   return h;
 }
 function blocksHtml(b) {
@@ -150,15 +150,15 @@ function openSession(w, d) {
     });
     h += `</div>`;
   }
-  if (day.b.length) h += sec(day.k === 'cage' ? 'Ensuite' : 'Déroulé') + `<div class="card">${blocksHtml(day.b)}${day.timer ? `<button class="btn cob block" style="margin-top:14px" data-a="timer" data-v="${day.timer}">${ic('timer')} Chrono 5 × 5 min</button>` : ''}</div>`;
+  if (day.b.length) h += sec(day.k === 'cage' ? 'Ensuite' : 'Déroulé') + `<div class="card">${blocksHtml(day.b)}${day.timer ? `<button class="btn cob block" style="margin-top:14px" data-a="timer" data-v="${day.timer}">${ic('timer')} Ouvrir le chrono</button>` : ''}</div>`;
   if (done) h += `<div class="note" style="margin-top:12px">Validée ${dayLabel(done.date).toLowerCase()}${done.dur ? ` · ${done.dur} min` : ''}${done.sets ? ` · ${done.sets} séries` : ''}.</div>`;
   const attrs = `data-w="${w}" data-d="${d}"`;
   let foot;
   if (day.k === 'gym' || day.k === 'cage') {
     const cur = S.active && S.active.week === w && S.active.dow === d;
-    foot = `<button class="btn pri block" data-a="${cur ? 'resume' : 'start'}" ${attrs}>${ic('play')} ${cur ? 'Reprendre' : done ? 'Refaire la séance' : 'Démarrer la séance'}</button>`;
+    foot = `<button class="btn pri block" data-a="${cur ? 'resume' : 'start'}" ${attrs}>${cur ? 'Reprendre la séance' : done ? 'Refaire la séance' : 'Commencer la séance'}</button>`;
   } else if (done) foot = `<button class="btn ghost block" data-a="undoDone" data-v="${done.id}">Annuler la validation</button>`;
-  else foot = `<button class="btn pri block" data-a="cardioDone" ${attrs}>${ic('check')} Marquer comme faite</button>`;
+  else foot = `<button class="btn pri block" data-a="cardioDone" ${attrs}>${ic('check')} C\u2019est fait</button>`;
   showOv(h, 'session', foot);
 }
 
@@ -193,11 +193,11 @@ function openWorkout() {
   const A = S.active; if (!A) return;
   const pl = planFor(A.week, A.dow);
   let h = ovBar(`Semaine ${A.week} · ${DOW[A.dow]}`, `<button class="ibtn" data-a="woMenu" aria-label="Options">${ic('more')}</button>`);
-  h += `<div class="wo-top"><div><div class="over">${esc(A.sub)}${A.deload ? ' · décharge' : ''}</div><div class="h1" style="font-size:40px">${esc(A.title)}</div></div><div style="text-align:right"><div class="wo-clock num" id="wo-clock">0:00</div><div class="small">chrono</div></div></div>`;
+  h += `<div class="wo-top"><div><div class="over">${esc(A.sub)}${A.deload ? ' · décharge' : ''}</div><div class="h1">${esc(A.title)}</div></div><div style="text-align:right"><div class="wo-clock num" id="wo-clock">0:00</div><div class="small">chrono</div></div></div>`;
   h += A.items.map((it, i) => excCard(it, i)).join('');
   h += `<button class="btn ghost block" style="margin-top:12px" data-a="addEx">${ic('plus')} Ajouter un exercice</button>`;
   if (pl.day.b.length) {
-    h += sec(A.kind === 'cage' ? 'Ensuite' : 'Déroulé') + `<div class="card">${blocksHtml(pl.day.b)}${pl.day.timer ? `<button class="btn cob block" style="margin-top:14px" data-a="timer" data-v="${pl.day.timer}">${ic('timer')} Chrono rounds</button>` : ''}`;
+    h += sec(A.kind === 'cage' ? 'Ensuite' : 'Déroulé') + `<div class="card">${blocksHtml(pl.day.b)}${pl.day.timer ? `<button class="btn cob block" style="margin-top:14px" data-a="timer" data-v="${pl.day.timer}">${ic('timer')} Ouvrir le chrono</button>` : ''}`;
     if (A.kind === 'cage') h += `<div class="grid2" style="margin-top:14px"><div class="field"><label class="lbl" for="c-min">Course (min)</label><input id="c-min" class="inp" inputmode="numeric" data-in="woCardio" data-f="min" value="${esc(A.cardio.min || '')}"></div><div class="field"><label class="lbl" for="c-km">Distance (km)</label><input id="c-km" class="inp" inputmode="decimal" data-in="woCardio" data-f="km" value="${esc(A.cardio.km || '')}"></div></div>`;
     h += `</div>`;
   }
@@ -239,11 +239,11 @@ function toggleSet(i, j) {
   for (let jj = j + 1; jj < it.sets.length; jj++) if (!it.sets[jj].done && it.sets[jj].r === '') it.sets[jj].ph = s.r;
   const bw = curWeight(), prev = bestFor(it.k, A.id), sc = setScore(it.k, s, bw);
   const inSession = Math.max(0, ...it.sets.filter((x, jj) => x.done && jj !== j).map(x => setScore(it.k, x, bw)));
-  if (prev > 0 && sc > prev && sc > inSession) { s.pr = true; prFlash('Record !'); haptic(2); beep(988, .12); beep(1319, .22, 'sine', .25, .12); }
+  if (prev > 0 && sc > prev && sc > inSession) { s.pr = true; prFlash('Nouveau record'); haptic(2); beep(988, .12); beep(1319, .22, 'sine', .25, .12); }
   else haptic(1);
   save(); refreshExc(i);
   const left = A.items.some((x, ii) => x.sets.some((y, jj) => !y.done && !(ii === i && jj === j)));
-  if (left) startRest(it.rest); else { hideRest(); toast('Toutes les séries sont faites. Termine la séance 💪'); }
+  if (left) startRest(it.rest); else { hideRest(); toast('Toutes les séries sont faites, tu peux terminer'); }
 }
 let CLOCK = null;
 function startClock() { stopClock(); const tick = () => { const el = $('#wo-clock'); if (el && S.active) el.textContent = mmss((Date.now() - S.active.start) / 1000); }; tick(); CLOCK = setInterval(tick, 1000); }
@@ -285,14 +285,14 @@ function finishWorkout(force) {
 }
 function showSummary(rec, before) {
   const xp = computeXP(), rk = rankOf(xp), rkB = rankOf(before);
-  let h = `<div class="celebrate"><svg viewBox="0 0 160 160" style="width:96px;height:96px;margin:0 auto 8px;color:var(--fau)" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"><path d="${octPath(80, 80, 70)}" stroke-width="6" opacity=".35"/><path d="M70 30 Q60 82 34 132"/><path d="M98 32 Q88 86 64 136"/><path d="M126 40 Q116 92 94 136"/></svg>
-    <div class="over">Semaine ${rec.week} · ${esc(rec.title)} · ${esc(rec.sub)}</div><div class="big" style="margin-top:6px">Séance<br>validée</div><div style="margin-top:12px"><span class="tag fau" style="font-size:15px;padding:6px 12px">+${xp - before} XP</span></div></div>
-    <div class="kpis"><div class="kpi"><div class="v num">${rec.dur}</div><div class="k">minutes</div></div><div class="kpi"><div class="v num">${fmt(rec.vol / 1000, 1)}</div><div class="k">tonnes soulevées</div></div><div class="kpi"><div class="v num">${rec.sets}</div><div class="k">séries</div></div><div class="kpi"><div class="v num" style="color:${rec.prs ? 'var(--sand)' : 'inherit'}">${rec.prs}</div><div class="k">record${rec.prs > 1 ? 's' : ''}</div></div></div>`;
-  if (rk.lvl > rkB.lvl) h += `<div class="note fau" style="margin-top:12px;text-align:center">Nouveau rang débloqué : <b>${esc(rk.name)}</b></div>`;
+  let h = `<div class="celebrate"><svg class="done-mark" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><circle cx="50" cy="50" r="44"/><path d="m32 51 12 12 24-25"/></svg>
+    <div class="over">Semaine ${rec.week} · ${esc(rec.title)} · ${esc(rec.sub)}</div><div class="big" style="margin-top:8px">Bien joué !</div><p class="sub" style="margin-top:8px">Séance terminée. Pense à manger tes protéines.</p><div style="margin-top:10px"><span class="tag fau" style="font-size:15px;padding:6px 12px">+${xp - before} points</span></div></div>
+    <div class="kpis"><div class="kpi"><div class="v num">${rec.dur}</div><div class="k">min</div></div><div class="kpi"><div class="v num">${fmt(rec.vol / 1000, 1)}</div><div class="k">tonnes soulevées</div></div><div class="kpi"><div class="v num">${rec.sets}</div><div class="k">série${rec.sets > 1 ? 's' : ''}</div></div><div class="kpi"><div class="v num" style="color:${rec.prs ? 'var(--fat)' : 'inherit'}">${rec.prs}</div><div class="k">record${rec.prs > 1 ? 's' : ''}</div></div></div>`;
+  if (rk.lvl > rkB.lvl) h += `<div class="note fau" style="margin-top:12px;text-align:center">Nouveau niveau : <b>${esc(rk.name)}</b></div>`;
   if (rec.prs) h += sec('Records') + `<div class="card tight">${rec.items.filter(it => it.sets.some(s => s.pr)).map(it => `<div class="li"><span class="prb">PR</span><span class="grow ttl">${esc(EX[it.k].n)}</span><span class="end small num">${esc(setsTxt(it.sets.filter(s => s.pr), it.k))}</span></div>`).join('')}</div>`;
   h += levelCard(xp, rk, streak());
   showOv(h, 'summary', `<button class="btn pri block" data-a="closeOv">Terminer</button>`);
-  setTimeout(() => { confetti(); bell(); haptic(2); }, 250);
+  setTimeout(() => { confetti(); beep(784, .18, 'sine', .25); beep(1046, .3, 'sine', .2, .14); haptic(2); }, 300);
 }
 
 /* ================= Chrono rounds ================= */
@@ -306,14 +306,14 @@ function openTimer(key = 'mma5') {
 function renderTimer() {
   if (!TM) return;
   let el = $('#timer'); if (!el) { el = document.createElement('div'); el.id = 'timer'; el.setAttribute('role', 'dialog'); document.body.appendChild(el); }
-  const ph = TM.phase; el.className = `timer ${ph}`;
+  const ph = TM.phase; el.className = `timer ph-${ph}`;
   const left = ph === 'idle' ? TM.work : ph === 'done' ? 0 : TM.paused ? Math.ceil(TM.pauseLeft / 1000) : Math.max(0, Math.ceil((TM.endAt - Date.now()) / 1000));
-  const label = { idle: TM.n, prep: 'Prépare-toi', work: 'Combat', rest: 'Repos', done: 'Terminé' }[ph];
+  const label = { idle: 'Chrono intervalles', prep: 'Prêt ?', work: 'Effort', rest: 'Récupération', done: 'Terminé' }[ph];
   const completed = ph === 'done' ? TM.rounds : ph === 'rest' ? TM.round : TM.round - 1;
-  el.innerHTML = `<div class="row sb" style="width:100%"><button class="ibtn" data-a="timerClose" aria-label="Fermer le chrono">${ic('x')}</button><div class="tp" style="font-size:18px">${TM.rounds} × ${mmss(TM.work)} · repos ${mmss(TM.rest)}</div><span style="width:44px"></span></div>
-    <div style="text-align:center;width:100%"><div class="tp" id="tm-p">${esc(label)}</div><div class="tt" id="tm-t">${ph === 'done' ? 'GG' : mmss(left)}</div>
-    <div class="tp" style="font-size:22px;opacity:.75">Round ${Math.min(TM.round, TM.rounds)} / ${TM.rounds}</div><div class="tr">${Array.from({ length: TM.rounds }, (_, i) => `<i class="${i < completed ? 'on' : ''}"></i>`).join('')}</div>
-    ${ph === 'idle' ? `<div class="chips" style="justify-content:center;margin-top:22px">${Object.entries(TIMERS).map(([k, v]) => `<button class="chip ${k === TM.key ? 'on' : ''}" data-a="timerPreset" data-v="${k}">${esc(v.n)} · ${v.rounds}×${mmss(v.work)}</button>`).join('')}</div>` : ''}</div>
+  el.innerHTML = `<div class="row sb" style="width:100%"><button class="ibtn" data-a="timerClose" aria-label="Fermer le chrono">${ic('x')}</button><div style="font-size:15px;font-weight:600;opacity:.8">${TM.rounds} × ${mmss(TM.work)} · récup ${mmss(TM.rest)}</div><span style="width:44px"></span></div>
+    <div style="text-align:center;width:100%"><div class="tp" id="tm-p">${esc(label)}</div><div class="tt" id="tm-t">${ph === 'done' ? 'Bravo' : mmss(left)}</div>
+    <div class="tp" style="font-size:20px;opacity:.75">Tour ${Math.min(TM.round, TM.rounds)} sur ${TM.rounds}</div><div class="tr">${Array.from({ length: TM.rounds }, (_, i) => `<i class="${i < completed ? 'on' : ''}"></i>`).join('')}</div>
+    ${ph === 'idle' ? `<div class="chips" style="justify-content:center;margin-top:22px">${Object.entries(TIMERS).map(([k, v]) => `<button class="chip ${k === TM.key ? 'on' : ''}" data-a="timerPreset" data-v="${k}">${esc(v.n)}</button>`).join('')}</div>` : ''}</div>
     <div class="ctrls">${ph === 'idle' || ph === 'done' ? `<button class="ibtn main" data-a="timerGo" aria-label="Démarrer">${ic('play')}</button>` : `<button class="ibtn" data-a="timerReset" aria-label="Recommencer">${ic('reset')}</button><button class="ibtn main" data-a="timerPause" aria-label="${TM.paused ? 'Reprendre' : 'Pause'}">${ic(TM.paused ? 'play' : 'pause')}</button><button class="ibtn" data-a="timerSkip" aria-label="Passer">${ic('next')}</button>`}</div>`;
 }
 function tmGo() { audio(); setLoud(true); requestWake(); TM.round = 1; TM.phase = 'prep'; TM.paused = false; TM.endAt = Date.now() + 10000; TM.last = null; clearInterval(TM.iv); TM.iv = setInterval(tmTick, 200); renderTimer(); haptic(); }
@@ -343,20 +343,20 @@ function vFood() {
   let h = `<header class="hd"><div><div class="over">Objectif ${fmt(t.kcal)} kcal · ${t.prot} g de protéines</div><h1 class="h1">Nutrition</h1></div></header>`;
   h += `<div class="row" style="margin-bottom:12px"><button class="ibtn" data-a="foodDay" data-v="-1" aria-label="Jour précédent">${ic('back')}</button><div class="grow" style="text-align:center;font-weight:700">${dayLabel(k)}</div><button class="ibtn" data-a="foodDay" data-v="1" ${k >= today() ? 'disabled style="opacity:.3"' : ''} aria-label="Jour suivant">${ic('next')}</button></div>`;
   const left = t.kcal - n.kcal;
-  h += `<div class="card"><div class="row sb" style="align-items:flex-end"><div><div class="lbl">Mangé</div><span class="big num">${fmt(n.kcal)}</span><span class="sub"> / ${fmt(t.kcal)} kcal</span></div><div style="text-align:right"><div class="mid num ${left < 0 ? 'fau' : ''}">${fmt(Math.abs(left))}</div><div class="small">${left >= 0 ? 'restantes' : 'en trop'}</div></div></div>
+  h += `<div class="card"><div class="row sb" style="align-items:flex-end"><div><div class="lbl">Mangé</div><span class="big num">${fmt(n.kcal)}</span><span class="sub"> / ${fmt(t.kcal)} kcal</span></div><div style="text-align:right"><div class="mid num ${left < 0 ? 'pro' : 'fau'}">${fmt(Math.abs(left))}</div><div class="small">${left >= 0 ? 'restantes' : 'en plus'}</div></div></div>
     <div style="margin:12px 0 14px">${bar(n.kcal / t.kcal, 'ink')}</div>
-    <div class="grid3">${[['Protéines', n.p, t.prot, ''], ['Glucides', n.c, t.carb, 'cob'], ['Lipides', n.f, t.fat, 'sand']].map(([l, v, g, c]) => `<div><div class="lbl">${l}</div><div class="num" style="font-weight:700;margin:2px 0 6px">${fmt(v)}<span class="small"> / ${g} g</span></div>${bar(v / g, c)}</div>`).join('')}</div>
+    <div class="grid3">${[['Protéines', n.p, t.prot, 'pro'], ['Glucides', n.c, t.carb, 'cob'], ['Lipides', n.f, t.fat, 'sand']].map(([l, v, g, c]) => `<div><div class="lbl">${l}</div><div class="num" style="font-weight:700;margin:2px 0 6px">${fmt(v)}<span class="small"> / ${g} g</span></div>${bar(v / g, c)}</div>`).join('')}</div>
     <div class="small" style="margin-top:12px">Fibres ${fmt(n.fib)} / ${t.fib} g</div></div>`;
   if (k === today()) { const sug = adaptSuggestion(); if (sug) h += adaptCard(sug); }
   const w = S.water[k] || 0;
-  h += `<div class="card" style="margin-top:12px"><div class="row sb"><div class="row">${ic('drop', 'cob')}<div><div class="h3">Eau</div><div class="small num">${fmt(w / 1000, 2)} / ${fmt(t.water / 1000, 2)} L</div></div></div><div class="row"><button class="ibtn" data-a="water" data-v="-250" aria-label="Retirer 250 ml">${ic('minus')}</button><button class="btn cob sm" data-a="water" data-v="250">+250 ml</button></div></div><div style="margin-top:12px">${bar(w / t.water, 'cob')}</div></div>`;
+  h += `<div class="card" style="margin-top:12px"><div class="row sb"><div class="row"><span class="kico" style="background:var(--waterBg);color:var(--water)">${ic('drop')}</span><div><div class="h3">Eau</div><div class="small num">${fmt(w / 1000, 2)} / ${fmt(t.water / 1000, 2)} L</div></div></div><div class="row"><button class="ibtn" data-a="water" data-v="-250" aria-label="Retirer 250 ml">${ic('minus')}</button><button class="btn cob sm" data-a="water" data-v="250">+250 ml</button></div></div><div style="margin-top:12px">${bar(w / t.water, 'water')}</div></div>`;
   for (const m of MEALS) {
     const list = entries.map((e, i) => [e, i]).filter(([e]) => e.m === m.k), mk = sumMac(list.map(x => x[0]));
     h += `<div class="card" style="margin-top:12px"><div class="card-h"><div><div class="h3">${m.n}</div><div class="small num">${fmt(mk.kcal)} kcal · P ${fmt(mk.p)} g</div></div><button class="ibtn" data-a="foodAdd" data-v="${m.k}" aria-label="Ajouter au ${m.n}">${ic('plus')}</button></div>`;
     h += list.length ? list.map(([e, i]) => { const mm = entryMac(e); return `<button class="li" data-a="entry" data-v="${i}"><span class="grow"><span class="ttl">${esc(entryName(e))}</span><span class="meta num">${e.q ? 'Ajout rapide' : `${fmt(e.g)} g`} · P ${fmt(mm.p)} · G ${fmt(mm.c)} · L ${fmt(mm.f)}</span></span><span class="end num" style="font-weight:700">${fmt(mm.kcal)}</span></button>`; }).join('') : `<div class="small">Rien pour l’instant.</div>`;
     h += `</div>`;
   }
-  h += sec('Journées types', `<button class="link" data-a="myFoods">Mes aliments ›</button>`);
+  h += sec('Journées types', `<button class="link" data-a="myFoods">Mes aliments</button>`);
   h += `<p class="sub" style="margin:-4px 2px 10px">Trois journées calibrées sur ta cible. Touche un repas pour l’ajouter d’un coup au journal.</p><div class="chips scroll">`;
   for (const pl of PLANS) {
     const f = planScale(pl, t.kcal), all = pl.meals.flatMap(m => scaledItems(m.items, f)), mk = itemsMac(all);
@@ -369,7 +369,7 @@ function openPlan(id) {
   const k = S.ui.foodDate || today(), t = targets(k), pl = PLANS.find(p => p.id === id), f = planScale(pl, t.kcal);
   let h = ovBar(esc(pl.n));
   const all = pl.meals.flatMap(m => scaledItems(m.items, f)), mk = itemsMac(all);
-  h += `<div class="over" style="margin-top:6px">${esc(pl.tag)} · ajusté à ta cible</div><div class="h1">${esc(pl.n)}</div><div class="chips" style="margin:12px 0"><span class="tag fau num">${fmt(mk.kcal)} kcal</span><span class="tag num">P ${fmt(mk.p)} g</span><span class="tag cob num">G ${fmt(mk.c)} g</span><span class="tag sand num">L ${fmt(mk.f)} g</span></div>`;
+  h += `<div class="over" style="margin-top:6px">${esc(pl.tag)} · ajusté à ta cible</div><div class="h1">${esc(pl.n)}</div><div class="chips" style="margin:12px 0"><span class="tag num">${fmt(mk.kcal)} kcal</span><span class="tag pro num">P ${fmt(mk.p)} g</span><span class="tag cob num">G ${fmt(mk.c)} g</span><span class="tag sand num">L ${fmt(mk.f)} g</span></div>`;
   pl.meals.forEach((m, i) => {
     const its = scaledItems(m.items, f), mm = itemsMac(its), meal = MEALS.find(x => x.k === m.m);
     h += `<div class="card" style="margin-top:12px"><div class="over">${meal.n}</div><div class="h2" style="margin:2px 0 8px">${esc(m.n)}</div>

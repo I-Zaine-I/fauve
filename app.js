@@ -36,7 +36,7 @@ const DEF = () => ({
   v: 1, created: today(), profile: null,
   weights: [], measures: [], workouts: [], food: {}, water: {}, habits: {}, customFoods: [],
   tests: [], photos: [], slots: {}, kcalAdj: 0, adjDate: null,
-  settings: { sound: true, haptics: true, loud: false }, active: null,
+  settings: { sound: true, haptics: true, loud: false, theme: 'auto' }, active: null,
   ui: { tab: 'today', week: null, foodDate: null }, dismiss: {}, lastExport: null
 });
 let S = load();
@@ -64,8 +64,8 @@ function planOn(k) { if (!S.profile) return null; const w = weekOf(k); return w 
 function dateFor(week, dow) { return addDays(mondayOf(S.profile.start), (week - 1) * 7 + dow); }
 const doneFor = (week, dow) => S.workouts.find(w => w.week === week && w.dow === dow);
 const workoutsOn = k => S.workouts.filter(w => w.date === k);
-const KIND_IC = { gym: 'dumbbell', cage: 'cage', swim: 'swim', run: 'run', rest: 'moon', mma: 'bolt', pre: 'flag' };
-const KIND_N = { gym: 'Salle', cage: 'Cage plein air', swim: 'Piscine', run: 'Course', rest: 'Repos', mma: 'MMA' };
+const KIND_IC = { gym: 'dumbbell', cage: 'tree', swim: 'swim', run: 'run', rest: 'moon', mma: 'users', pre: 'flag' };
+const KIND_N = { gym: 'Salle', cage: 'Plein air', swim: 'Piscine', run: 'Course', rest: 'Repos', mma: 'Cours' };
 
 /* ================= Nutrition ================= */
 const ACT = [
@@ -275,27 +275,27 @@ function haptic(n = 1) {
 }
 let toastT;
 function toast(msg) { const t = $('#toast'); if (!t) return; t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600); }
-function confetti(n = 140) {
+function confetti(n = 90) {
   if (reduced()) return;
   const c = $('#fx'), ctx = c.getContext('2d'), dpr = devicePixelRatio || 1, W = innerWidth, H = innerHeight;
   c.width = W * dpr; c.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  const cols = ['#FF4B1F', '#FF7A3D', '#EDE6D8', '#5B7BFF', '#E2B868'];
-  const ps = Array.from({ length: n }, (_, i) => ({ x: W / 2 + (Math.random() - .5) * 60, y: H * .38, vx: (Math.random() - .5) * 15, vy: -Math.random() * 15 - 5, s: 4 + Math.random() * 7, r: Math.random() * 6.3, vr: (Math.random() - .5) * .35, c: cols[i % cols.length] }));
+  const cols = ['#2BB884', '#4A7FE8', '#EE6E5C', '#E3A332', '#8FD9BB'];
+  const ps = Array.from({ length: n }, (_, i) => ({ x: W / 2 + (Math.random() - .5) * 80, y: H * .3, vx: (Math.random() - .5) * 11, vy: -Math.random() * 11 - 4, s: 3 + Math.random() * 4, r: Math.random() * 6.3, vr: (Math.random() - .5) * .2, c: cols[i % cols.length], round: i % 2 }));
   const t0 = performance.now();
   (function frame(t) {
     const el = t - t0; ctx.clearRect(0, 0, W, H);
     for (const p of ps) {
-      p.vy += .38; p.vx *= .985; p.x += p.vx; p.y += p.vy; p.r += p.vr;
-      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.globalAlpha = Math.max(0, 1 - el / 2400); ctx.fillStyle = p.c;
-      ctx.beginPath(); for (let k = 0; k < 8; k++) { const a = (k * 45 + 22.5) * Math.PI / 180; ctx.lineTo(Math.cos(a) * p.s, Math.sin(a) * p.s * .7); } ctx.closePath(); ctx.fill(); ctx.restore();
+      p.vy += .3; p.vx *= .985; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.globalAlpha = Math.max(0, 1 - el / 2200); ctx.fillStyle = p.c;
+      ctx.beginPath(); if (p.round) ctx.arc(0, 0, p.s, 0, 6.29); else ctx.roundRect ? ctx.roundRect(-p.s, -p.s / 2, p.s * 2, p.s, p.s / 2) : ctx.rect(-p.s, -p.s / 2, p.s * 2, p.s); ctx.fill(); ctx.restore();
     }
-    if (el < 2400) requestAnimationFrame(frame); else ctx.clearRect(0, 0, W, H);
+    if (el < 2200) requestAnimationFrame(frame); else ctx.clearRect(0, 0, W, H);
   })(t0);
 }
-function prFlash(text = 'Record') {
+function prFlash(text = 'Nouveau record') {
   const d = document.createElement('div'); d.className = 'pr-flash';
-  d.innerHTML = `<div class="in"><svg class="claws" viewBox="0 0 160 160" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"><path d="M70 14 Q58 80 22 146"/><path d="M106 18 Q94 84 60 150"/><path d="M142 26 Q130 90 98 152"/></svg><div class="t">${esc(text)}</div></div>`;
-  document.body.appendChild(d); setTimeout(() => d.remove(), 1900);
+  d.innerHTML = `<div class="in"><span class="pr-ic">${ic('trophy')}</span><div><div class="t">${esc(text)}</div><div class="small">Bravo, tu progresses</div></div></div>`;
+  document.body.appendChild(d); setTimeout(() => d.remove(), 2300);
 }
 let WL = null;
 async function requestWake() { try { if ('wakeLock' in navigator && !WL) { WL = await navigator.wakeLock.request('screen'); WL.addEventListener('release', () => { WL = null; }); } } catch (e) { WL = null; } }
@@ -342,10 +342,14 @@ const I = {
   octoCheck: '<path d="M8.3 3h7.4L21 8.3v7.4L15.7 21H8.3L3 15.7V8.3z"/><path d="m8 12.3 2.8 2.8L16.5 9.4"/>',
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   sparkle: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>',
-  more: '<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>'
+  more: '<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>',
+  tree: '<path d="M12 21v-6M12 3 6.5 11h3L6 16h12l-3.5-5h3z"/>',
+  users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.9-3.3 3.4-5 6.5-5s5.6 1.7 6.5 5M16 4.6a3.5 3.5 0 0 1 0 6.8M18 15.3c1.7.6 3 2.2 3.5 4.7"/>',
+  circle: '<circle cx="12" cy="12" r="9"/>',
+  circleCheck: '<circle cx="12" cy="12" r="9"/><path d="m8 12.4 2.7 2.7L16.2 9.6"/>',
+  heart: '<path d="M12 20s-7.5-4.4-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.6-7.5 10-7.5 10z"/>'
 };
 const ic = (n, cls = '') => `<svg class="ic ${cls}" viewBox="0 0 24 24" aria-hidden="true">${I[n] || ''}</svg>`;
-const CLAW = '<svg class="claw" viewBox="0 0 200 260" fill="currentColor" aria-hidden="true"><path d="M74 0 Q54 120 2 252 Q80 132 104 8 Z"/><path d="M124 10 Q104 132 52 260 Q130 142 154 18 Z"/><path d="M172 26 Q152 142 102 260 Q176 152 199 34 Z"/></svg>';
 
 /* ================= Composants ================= */
 function octPath(cx, cy, a) {
@@ -354,15 +358,15 @@ function octPath(cx, cy, a) {
   return d + ' Z';
 }
 function ring(size, rings, sw, gap, center = '') {
-  let s = '', a = size / 2 - sw / 2;
-  for (const r of rings) {
-    const R = a / Math.cos(Math.PI / 8), L = 16 * R * Math.sin(Math.PI / 8), d = octPath(size / 2, size / 2, a), pct = clamp(r.pct || 0, 0, 1);
-    s += `<path class="trk" d="${d}" stroke-width="${sw}"/><path class="val" d="${d}" stroke="${r.color}" stroke-width="${sw}" stroke-dasharray="${L.toFixed(1)}" stroke-dashoffset="${L.toFixed(1)}" data-off="${(L * (1 - pct)).toFixed(1)}"/>`;
-    a -= sw + gap;
+  let s = '', r = size / 2 - sw / 2; const c = size / 2;
+  for (const g of rings) {
+    const L = 2 * Math.PI * r, pct = clamp(g.pct || 0, 0, 1);
+    s += `<circle class="trk" cx="${c}" cy="${c}" r="${r.toFixed(2)}" stroke-width="${sw}"/><circle class="val" cx="${c}" cy="${c}" r="${r.toFixed(2)}" transform="rotate(-90 ${c} ${c})" style="stroke:${g.color}" stroke-width="${sw}" stroke-dasharray="${L.toFixed(1)}" stroke-dashoffset="${L.toFixed(1)}" data-off="${(L * (1 - pct)).toFixed(1)}"/>`;
+    r -= sw + gap;
   }
   return `<div class="ring" style="width:${size}px;height:${size}px"><svg viewBox="0 0 ${size} ${size}" aria-hidden="true">${s}</svg><div class="ctr">${center}</div></div>`;
 }
-const octSmall = (cls = '') => `<svg class="oct ${cls}" viewBox="0 0 26 26"><path d="${octPath(13, 13, 11)}"/></svg>`;
+const octSmall = (cls = '') => `<svg class="oct ${cls}" viewBox="0 0 26 26"><circle cx="13" cy="13" r="10"/></svg>`;
 function bar(pct, cls = '') { const p = clamp(pct, 0, 1); return `<div class="bar ${cls} ${pct > 1.05 ? 'over' : ''}"><i data-w="${(p * 100).toFixed(1)}"></i></div>`; }
 function animateIn(root = document) {
   requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -370,11 +374,11 @@ function animateIn(root = document) {
     $$('.bar>i[data-w], .vb>i[data-w]', root).forEach(b => { b.style.width = b.dataset.w + '%'; });
   }));
 }
-function spark(vals, w = 84, h = 30, color = 'var(--fau)') {
-  if (vals.length < 2) return `<svg class="spark" viewBox="0 0 ${w} ${h}"><line x1="0" y1="${h / 2}" x2="${w}" y2="${h / 2}" stroke="var(--s4)" stroke-width="2" stroke-dasharray="3 4"/></svg>`;
+function spark(vals, w = 80, h = 30, color = 'var(--acc2)') {
+  if (vals.length < 2) return `<svg class="spark" viewBox="0 0 ${w} ${h}"><line x1="0" y1="${h / 2}" x2="${w}" y2="${h / 2}" style="stroke:var(--s3)" stroke-width="2" stroke-dasharray="3 4"/></svg>`;
   const mn = Math.min(...vals), mx = Math.max(...vals), rg = mx - mn || 1;
   const pts = vals.map((v, i) => `${(i / (vals.length - 1) * (w - 4) + 2).toFixed(1)},${(h - 3 - (v - mn) / rg * (h - 6)).toFixed(1)}`);
-  return `<svg class="spark" viewBox="0 0 ${w} ${h}"><polyline points="${pts.join(' ')}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${pts[pts.length - 1].split(',')[0]}" cy="${pts[pts.length - 1].split(',')[1]}" r="3" fill="${color}"/></svg>`;
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}"><polyline points="${pts.join(' ')}" fill="none" style="stroke:${color}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${pts[pts.length - 1].split(',')[0]}" cy="${pts[pts.length - 1].split(',')[1]}" r="3" style="fill:${color}"/></svg>`;
 }
 function targetTxt(e) {
   const ex = EX[e[0]]; const u = ex.u === 's' ? ' s' : ex.u === 'm' ? ' m' : '';
@@ -385,3 +389,13 @@ function setsTxt(sets, k) {
   const ex = EX[k] || {};
   return sets.map(s => { const w = +s.w || 0; const r = s.r; if (ex.u === 's') return `${r} s`; if (ex.u === 'm') return `${fmt(w, 2)} kg × ${r} m`; if (ex.bw && !w) return `${r}`; return `${fmt(w, 2)}×${r}`; }).join(' · ');
 }
+
+/* ================= Thème ================= */
+const darkMQ = matchMedia('(prefers-color-scheme: dark)');
+function applyTheme() {
+  const t = S.settings.theme || 'auto', root = document.documentElement;
+  if (t === 'auto') delete root.dataset.theme; else root.dataset.theme = t;
+  const dark = t === 'dark' || (t === 'auto' && darkMQ.matches);
+  $$('meta[name="theme-color"]').forEach(m => { m.setAttribute('content', dark ? '#0E1110' : '#F4F4F1'); m.removeAttribute('media'); });
+}
+darkMQ.addEventListener && darkMQ.addEventListener('change', () => { applyTheme(); if (typeof drawCharts === 'function') drawCharts(); });

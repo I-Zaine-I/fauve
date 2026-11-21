@@ -8,11 +8,11 @@ function vProg() {
   h += `<div class="card"><div class="row sb" style="align-items:flex-start"><div><div class="lbl">Poids · tendance lissée</div><span class="big num">${fmt(cur, 1)}</span><span class="sub"> kg</span></div>
     <div style="text-align:right"><span class="tag ${d0 <= 0 ? 'fau' : 'sand'} num">${Math.abs(d0) < 0.05 ? '±0' : (d0 < 0 ? '−' : '+') + fmt(Math.abs(d0), 1)} kg</span><div class="small num" style="margin-top:6px">${rate == null ? 'Rythme : ~2 semaines de pesées' : `${rate <= 0 ? '−' : '+'}${fmt(Math.abs(rate), 2)} %/sem.`}</div></div></div>
     <div class="chart" data-chart="weight"></div>
-    <div class="row" style="margin-top:10px"><button class="btn sm pri" data-a="weigh">${ic('plus')} Pesée</button><span class="small grow" style="text-align:right">Points : pesées · ligne : tendance</span></div></div>`;
+    <div class="row" style="margin-top:10px"><button class="btn sm pri" data-a="weigh">${ic('plus')} Pesée</button><span class="small grow" style="text-align:right">Points : pesées · courbe : tendance</span></div></div>`;
 
   const m = lastMeasure(), m0 = firstMeasure(), bf = navyBF(m), vr = m && m.shoulders && m.waist ? m.shoulders / m.waist : null;
   const dWaist = m && m0 && m !== m0 && m.waist && m0.waist ? m.waist - m0.waist : null;
-  h += sec('Composition', `<button class="link" data-a="measure">+ Mensurations</button>`);
+  h += sec('Composition', `<button class="link" data-a="measure">Mensurations</button>`);
   h += `<div class="grid2"><div class="kpi"><div class="v num">${bf == null ? '–' : fmt(bf, 1) + '<span class="small"> %</span>'}</div><div class="k">Masse grasse estimée${bf != null ? ` · ${fmt(cur * (1 - bf / 100), 1)} kg de masse maigre` : ''}</div></div>
     <div class="kpi"><div class="v num">${vr == null ? '–' : fmt(vr, 2)}</div><div class="k">Ratio V (épaules / taille) · repère ~1,6</div>${vr ? `<div style="margin-top:8px">${bar(clamp((vr - 1.2) / 0.4, 0, 1))}</div>` : ''}</div>
     <div class="kpi"><div class="v num">${m && m.waist ? fmt(m.waist, 1) : '–'}<span class="small"> cm</span></div><div class="k">Tour de taille${dWaist != null ? ` · <b class="${dWaist <= 0 ? 'fau' : ''}">${dWaist <= 0 ? '−' : '+'}${fmt(Math.abs(dWaist), 1)} cm</b>` : ''}</div></div>
@@ -34,19 +34,19 @@ function vProg() {
   for (const mu of VOLUME_MUSCLES) { const v = vol[mu] || 0; h += `<span>${MUSCLES[mu]}</span><div class="vb"><span class="zone"></span><i data-w="${clamp(v / 25 * 100, 0, 100).toFixed(1)}" style="${v >= 10 ? '' : 'background:var(--s4)'}"></i></div><span class="num" style="text-align:right;font-weight:700">${fmt(v, 1)}</span>`; }
   h += `</div><p class="small" style="margin:10px 0 0">Séries validées depuis lundi. Une série d’un exercice qui sollicite le muscle en second compte pour moitié.</p></div>`;
 
-  h += sec('Tests athlétiques', `<button class="link" data-a="tests">+ Tests</button>`) + `<div class="card tight">`;
+  h += sec('Tests athlétiques', `<button class="link" data-a="tests">Ajouter</button>`) + `<div class="card tight">`;
   h += TESTS.map(t => { const all = S.tests.filter(x => x.k === t.k), a = all[0], b = all[all.length - 1]; const u = t.u === 'reps' ? '' : ` ${t.u}`;
     return `<div class="li"><span class="grow"><span class="ttl">${esc(t.n)}</span><span class="meta">${a ? `Départ ${fmt(a.v)}${u} (${fdate(a.d)})` : esc(t.d)}</span></span><span class="end num" style="font-weight:800">${b ? fmt(b.v) + `<span class="small">${u}</span>` : '–'}${a && b && b !== a ? `<span class="small fau" style="display:block">${b.v - a.v >= 0 ? '+' : '−'}${fmt(Math.abs(b.v - a.v))}</span>` : ''}</span></div>`; }).join('');
   h += `</div>`;
 
-  h += sec('Photos', S.photos.length >= 2 ? `<button class="link" data-a="compare">Avant / après ›</button>` : '');
+  h += sec('Photos', S.photos.length >= 2 ? `<button class="link" data-a="compare">Avant / après</button>` : '');
   h += `<div class="card"><div class="photos">${[...S.photos].reverse().slice(0, 6).map(ph => `<button data-a="photo" data-v="${ph.id}"><img data-photo="${ph.id}" alt="Photo du ${fdate(ph.d)}"><span>${fdate(ph.d)}</span></button>`).join('')}</div>
     ${S.photos.length ? '' : '<p class="sub" style="margin:0 0 10px">Même lumière, même pose, même heure. Une photo toutes les 2 semaines suffit.</p>'}
     <label class="btn sm ghost" style="margin-top:${S.photos.length ? 12 : 0}px">${ic('camera')} Ajouter une photo<input type="file" accept="image/*" data-in="photo" hidden></label><div class="small" style="margin-top:8px">Les photos restent sur ton téléphone, elles ne sont jamais envoyées.</div></div>`;
 
   h += sec('Historique') + `<div class="card tight">`;
   const ws = [...S.workouts].reverse().slice(0, 15);
-  h += ws.length ? ws.map(w => `<button class="li" data-a="history" data-v="${w.id}"><span class="kico ${w.kind}">${ic(KIND_IC[w.kind] || 'dumbbell')}</span><span class="grow"><span class="ttl">${esc(w.title)} · ${esc(w.sub || '')}</span><span class="meta">${dayLabel(w.date)} · ${w.dur || '–'} min${w.vol ? ` · ${fmt(w.vol / 1000, 1)} t` : ''}${w.prs ? ` · <b style="color:var(--sand)">${w.prs} PR</b>` : ''}</span></span>${ic('next')}</button>`).join('') : `<div class="empty">${ic('dumbbell')}Aucune séance pour l’instant.</div>`;
+  h += ws.length ? ws.map(w => `<button class="li" data-a="history" data-v="${w.id}"><span class="kico ${w.kind}">${ic(KIND_IC[w.kind] || 'dumbbell')}</span><span class="grow"><span class="ttl">${esc(w.title)} · ${esc(w.sub || '')}</span><span class="meta">${dayLabel(w.date)} · ${w.dur || '–'} min${w.vol ? ` · ${fmt(w.vol / 1000, 1)} t` : ''}${w.prs ? ` · <b style="color:var(--fat)">${w.prs} record${w.prs > 1 ? 's' : ''}</b>` : ''}</span></span>${ic('next')}</button>`).join('') : `<div class="empty">${ic('dumbbell')}Aucune séance pour l’instant.</div>`;
   h += `</div>`;
   return h;
 }
@@ -58,17 +58,17 @@ function drawCharts() {
   if (tr.length < 2) { el.innerHTML = `<div class="empty" style="padding-top:60px">Pèse-toi chaque matin : la courbe apparaît dès la 2<sup>e</sup> pesée.</div>`; return; }
   const d0 = tr[0].d, span = Math.max(1, diffDays(d0, tr[tr.length - 1].d));
   const vals = tr.flatMap(x => [x.kg, x.t]); let mn = Math.min(...vals), mx = Math.max(...vals); const padv = Math.max(0.4, (mx - mn) * 0.15); mn -= padv; mx += padv;
-  const L = 30, R = 8, T = 10, B = 22;
+  const L = 30, R = 8, T = 10, B = 22, cs = getComputedStyle(document.documentElement), acc = cs.getPropertyValue('--acc2').trim() || '#2BB884', dim = cs.getPropertyValue('--s4').trim() || '#bbb', s1 = cs.getPropertyValue('--s1').trim() || '#fff', grid = cs.getPropertyValue('--line').trim() || 'rgba(0,0,0,.06)';
   const X = d => L + diffDays(d0, d) / span * (W - L - R), Y = v => T + (1 - (v - mn) / (mx - mn)) * (H - T - B);
-  let s = `<defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF4B1F" stop-opacity=".28"/><stop offset="1" stop-color="#FF4B1F" stop-opacity="0"/></linearGradient></defs>`;
-  for (let i = 0; i <= 3; i++) { const v = mn + (mx - mn) * i / 3, y = Y(v); s += `<line x1="${L}" x2="${W - R}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="rgba(255,255,255,.06)"/><text x="${L - 6}" y="${(y + 4).toFixed(1)}" text-anchor="end">${fmt(v, 1)}</text>`; }
+  let s = `<defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${acc}" stop-opacity=".22"/><stop offset="1" stop-color="${acc}" stop-opacity="0"/></linearGradient></defs>`;
+  for (let i = 0; i <= 3; i++) { const v = mn + (mx - mn) * i / 3, y = Y(v); s += `<line x1="${L}" x2="${W - R}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${grid}"/><text x="${L - 6}" y="${(y + 4).toFixed(1)}" text-anchor="end">${fmt(v, 1)}</text>`; }
   const ticks = W < 360 ? 2 : 3;
   for (let i = 0; i <= ticks; i++) { const d = addDays(d0, Math.round(span * i / ticks)); s += `<text x="${X(d).toFixed(1)}" y="${H - 4}" text-anchor="${i === 0 ? 'start' : i === ticks ? 'end' : 'middle'}">${fdate(d)}</text>`; }
   const line = tr.map((x, i) => `${i ? 'L' : 'M'}${X(x.d).toFixed(1)} ${Y(x.t).toFixed(1)}`).join(' ');
   s += `<path d="${line} L${X(tr[tr.length - 1].d).toFixed(1)} ${H - B} L${X(d0).toFixed(1)} ${H - B} Z" fill="url(#wg)"/>`;
-  s += tr.map(x => `<circle cx="${X(x.d).toFixed(1)}" cy="${Y(x.kg).toFixed(1)}" r="2.6" fill="#55555E"/>`).join('');
-  s += `<path d="${line}" fill="none" stroke="#FF4B1F" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>`;
-  const lx = tr[tr.length - 1]; s += `<circle cx="${X(lx.d).toFixed(1)}" cy="${Y(lx.t).toFixed(1)}" r="5" fill="#FF4B1F" stroke="#141416" stroke-width="2"/>`;
+  s += tr.map(x => `<circle cx="${X(x.d).toFixed(1)}" cy="${Y(x.kg).toFixed(1)}" r="2.6" fill="${dim}"/>`).join('');
+  s += `<path d="${line}" fill="none" stroke="${acc}" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/>`;
+  const lx = tr[tr.length - 1]; s += `<circle cx="${X(lx.d).toFixed(1)}" cy="${Y(lx.t).toFixed(1)}" r="5.5" fill="${acc}" stroke="${s1}" stroke-width="2.5"/>`;
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Courbe de poids">${s}</svg>`;
 }
 let chartRO = null;
@@ -91,7 +91,7 @@ async function addPhoto(file) {
     const bmp = await createImageBitmap(file).catch(() => null);
     let blob = file;
     if (bmp) { const sc = Math.min(1, 1280 / Math.max(bmp.width, bmp.height)); const c = document.createElement('canvas'); c.width = Math.round(bmp.width * sc); c.height = Math.round(bmp.height * sc); c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height); blob = await new Promise(r => c.toBlob(r, 'image/jpeg', .82)) || file; }
-    const id = 'p' + uid(); await IDB.put(id, blob); S.photos.push({ id, d: today() }); invalidate(); save(); haptic(); toast('Photo enregistrée · +20 XP'); render();
+    const id = 'p' + uid(); await IDB.put(id, blob); S.photos.push({ id, d: today() }); invalidate(); save(); haptic(); toast('Photo enregistrée'); render();
   } catch (e) { toast('Impossible d’enregistrer la photo'); }
 }
 async function openPhoto(id) {
@@ -147,20 +147,20 @@ function vMe() {
   h += `<div class="card"><div class="grid3">${[['Âge', p.age, 'ans'], ['Taille', p.height, 'cm'], ['Départ', p.weight, 'kg']].map(([l, v, u]) => `<div><div class="lbl">${l}</div><div class="mid num">${fmt(v, 1)}<span class="small"> ${u}</span></div></div>`).join('')}</div>
     <div class="sep"></div><div class="small" style="color:var(--ink)">${esc(act.n)} · ${esc(MODES[p.mode].n)}</div><div class="small">Programme dès le ${fdate(p.start)} · MMA le ${fdate(p.mma)}</div></div>`;
   h += sec('Tes cibles') + `<div class="card"><div class="row sb"><div><div class="lbl">Calories / jour</div><div class="big num">${fmt(t.kcal)}</div></div><div style="text-align:right" class="small num">Repos : ${fmt(t.bmr)} kcal<br>Dépense : ${fmt(t.tdee)} kcal<br>${t.deficit >= 0 ? 'Déficit' : 'Surplus'} : ${fmt(Math.abs(t.deficit))} kcal${S.kcalAdj ? `<br>Ajusté : ${S.kcalAdj > 0 ? '+' : '−'}${Math.abs(S.kcalAdj)} kcal` : ''}</div></div>
-    <div class="grid3" style="margin-top:14px">${[['Protéines', t.prot, 'fau'], ['Glucides', t.carb, 'cob'], ['Lipides', t.fat, 'sand']].map(([l, v, c]) => `<div><div class="lbl">${l}</div><div class="mid num ${c}">${v}<span class="small"> g</span></div></div>`).join('')}</div>
+    <div class="grid3" style="margin-top:14px">${[['Protéines', t.prot, 'pro'], ['Glucides', t.carb, 'cob'], ['Lipides', t.fat, 'sand']].map(([l, v, c]) => `<div><div class="lbl">${l}</div><div class="mid num ${c}">${v}<span class="small"> g</span></div></div>`).join('')}</div>
     <p class="small" style="margin:12px 0 0">Protéines ${fmt(t.prot / t.w, 1)} g/kg · eau ${fmt(t.water / 1000, 2)} L · fibres ${t.fib} g. Objectif de rythme : ${t.rate > 0 ? `−${fmt(t.rate, 1)} % de poids/semaine` : t.rate < 0 ? `+${fmt(-t.rate, 1)} %/semaine` : 'stable'}.</p>
     ${S.kcalAdj ? '<button class="link" data-a="resetAdj">Annuler les ajustements</button>' : ''}</div>`;
   h += sec('Zones cardio') + `<div class="card"><div class="small" style="margin-bottom:10px">FC max estimée : <b style="color:var(--ink)" class="num">${hrmax} bpm</b> (formule de Tanaka)</div>
-    ${[['Zone 2 · endurance', .6, .7, 'cob'], ['Seuil · fractionné', .8, .88, 'sand'], ['Rouge · sprints', .9, 1, 'fau']].map(([l, a, b, c]) => `<div class="row sb" style="padding:6px 0"><span>${l}</span><span class="tag ${c} num">${Math.round(hrmax * a)}–${Math.round(hrmax * b)} bpm</span></div>`).join('')}
+    ${[['Zone 2 · endurance', .6, .7, 'cob'], ['Seuil · fractionné', .8, .88, 'sand'], ['Maximal · sprints', .9, 1, 'pro']].map(([l, a, b, c]) => `<div class="row sb" style="padding:6px 0"><span>${l}</span><span class="tag ${c} num">${Math.round(hrmax * a)}–${Math.round(hrmax * b)} bpm</span></div>`).join('')}
     <p class="small" style="margin:8px 0 0">Sans cardiofréquencemètre : en zone 2, tu peux parler en phrases complètes.</p></div>`;
   h += sec('Créneaux', `<button class="link" data-a="slots">Modifier</button>`) + `<div class="card tight">${DOW.map((d, i) => `<div class="row sb" style="padding:6px 0"><span>${d}</span><span class="num ${S.slots[i] ? '' : 'small'}">${S.slots[i] ? esc(S.slots[i]) : 'non défini'}</span></div>`).join('')}</div>`;
   h += sec('Le guide', `<span class="small">appuyé sur la science</span>`) + `<div class="card tight">${GUIDE.map(g => `<details class="acc"><summary>${esc(g.t)}${ic('plus')}</summary><div class="acc-b">${g.p.map(x => `<p>${esc(x)}</p>`).join('')}${g.src ? `<div class="src">${g.src.map(([l, u]) => `<a href="${u}" target="_blank" rel="noopener">${esc(l)} ↗</a>`).join('')}</div>` : ''}</div></details>`).join('')}</div>`;
-  h += sec('Réglages') + `<div class="card tight">${[['sound', 'Sons (chronos, repos)'], ['haptics', 'Vibrations'], ['loud', 'Chrono rounds audible en mode silencieux (coupe ta musique)']].map(([k, l]) => `<label class="row sb" style="min-height:52px"><span>${l}</span><span class="toggle"><input type="checkbox" data-in="setting" data-v="${k}" ${S.settings[k] ? 'checked' : ''}><i></i></span></label>`).join('')}</div>`;
+  h += sec('Réglages') + `<div class="card tight"><div class="row sb" style="min-height:60px"><span>Apparence</span><div class="seg" style="width:210px">${[['auto', 'Auto'], ['light', 'Clair'], ['dark', 'Sombre']].map(([k, l]) => `<button class="${(S.settings.theme || 'auto') === k ? 'on' : ''}" data-a="theme" data-v="${k}">${l}</button>`).join('')}</div></div>${[['sound', 'Sons (chronos, repos)'], ['haptics', 'Vibrations'], ['loud', 'Chrono audible en mode silencieux (coupe ta musique)']].map(([k, l]) => `<label class="row sb" style="min-height:52px"><span>${l}</span><span class="toggle"><input type="checkbox" data-in="setting" data-v="${k}" ${S.settings[k] ? 'checked' : ''}><i></i></span></label>`).join('')}</div>`;
   const ago = S.lastExport ? diffDays(S.lastExport, today()) : null;
   h += sec('Tes données') + `<div class="card"><p class="sub" style="margin-top:0">Tout est stocké sur ce téléphone, rien sur un serveur. Sauvegarde régulièrement dans Fichiers ou iCloud Drive.</p>
     <div class="small" style="margin-bottom:12px;color:${ago == null || ago > 14 ? 'var(--fau2)' : 'var(--mut)'}">Dernière sauvegarde : ${ago == null ? 'jamais' : ago === 0 ? 'aujourd’hui' : `il y a ${ago} jours`}</div>
     <div class="row"><button class="btn pri sm grow" data-a="export">${ic('download')} Sauvegarder</button><label class="btn ghost sm grow">Restaurer<input type="file" accept="application/json,.json" data-in="import" hidden></label></div>
     <button class="link" style="margin-top:8px;color:var(--mut)" data-a="reset">Tout effacer et recommencer</button></div>`;
-  h += `<p class="small" style="margin:22px 4px 0">FAUVE v1 · Les conseils de l’appli ne remplacent pas un avis médical. Si tu as un souci de santé, une douleur ou un traitement, demande l’avis d’un médecin avant de démarrer.</p>`;
+  h += `<p class="small" style="margin:22px 4px 0">Fauve v2 · Les conseils de l’appli ne remplacent pas un avis médical. Si tu as un souci de santé, une douleur ou un traitement, demande l’avis d’un médecin avant de démarrer.</p>`;
   return h;
 }
